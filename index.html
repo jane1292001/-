@@ -95,6 +95,18 @@
                             </div>
                         </div>
 
+                        <!-- 庫存與登記截止日欄位 -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">可訂購數量 (庫存限制) *</label>
+                                <input type="number" id="p-stock" required min="0" value="10" placeholder="例如: 10" class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">登記截止日期 (選填，過期停止下單)</label>
+                                <input type="date" id="p-deadline" class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 text-sm bg-white">
+                            </div>
+                        </div>
+
                         <!-- 多圖上傳區 (1~5張) -->
                         <div>
                             <label class="block text-xs font-bold text-gray-600 mb-1">選擇商品照片 (最多 5 張) *</label>
@@ -132,6 +144,8 @@
                                     <th class="p-3">商品名稱</th>
                                     <th class="p-3">國家/分類</th>
                                     <th class="p-3">售價 (NT$)</th>
+                                    <th class="p-3">剩餘庫存</th>
+                                    <th class="p-3">截止日期</th>
                                     <th class="p-3 text-right">操作</th>
                                 </tr>
                             </thead>
@@ -157,7 +171,7 @@
                                 <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b">
                                     <th class="p-3">訂單編號 / 時間</th>
                                     <th class="p-3">買家資訊</th>
-                                    <th class="p-3">取貨方式 / 門市 / 匯款後五碼</th>
+                                    <th class="p-3">取貨方式 / 門市</th>
                                     <th class="p-3">商品明細</th>
                                     <th class="p-3">總金額</th>
                                     <th class="p-3">狀態</th>
@@ -188,14 +202,14 @@
                             <input type="url" id="setting-line-url" placeholder="https://line.me/R/ti/p/@your_line_id" class="w-full px-3 py-2 border rounded-xl text-sm">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-600 mb-1">銀行轉帳帳號說明 (顯示於買家訂單查詢)</label>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">銀行轉帳帳號說明</label>
                             <textarea id="setting-bank-info" rows="2" class="w-full px-3 py-2 border rounded-xl text-sm" placeholder="例如: 822 中國信託 帳號: 123456789012"></textarea>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-600 mb-1">Google Sheets Web App URL (GAS 網址)</label>
                             <input type="url" id="setting-sheets-url" placeholder="https://script.google.com/..." class="w-full px-3 py-2 border rounded-xl text-sm">
                         </div>
-                        <button onclick="saveBasicSettings()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl text-sm cursor-pointer">儲存設定</button>
+                        <button onclick="saveBasicSettings()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl text-sm cursor-pointer">儲存設定並同步至雲端</button>
                     </div>
 
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
@@ -251,6 +265,7 @@
                     <span id="modal-p-country" class="bg-indigo-50 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-full"></span>
                     <h4 id="modal-p-title" class="font-black text-xl text-gray-900 mt-2"></h4>
                     <p id="modal-p-price" class="text-lg font-black text-indigo-600 mt-1"></p>
+                    <div id="modal-p-status-badge" class="mt-2"></div>
                     <p id="modal-p-desc" class="text-sm text-gray-600 mt-3 whitespace-pre-line bg-gray-50 p-3 rounded-xl"></p>
                 </div>
             </div>
@@ -271,7 +286,7 @@
         </div>
     </div>
 
-    <!-- ==================== 購物車彈窗 (內含 LINE 一鍵綁定與獨立 7-11 / 全家) ==================== -->
+    <!-- ==================== 購物車彈窗 (單純填寫收件資訊) ==================== -->
     <div id="cart-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="p-5 border-b flex justify-between items-center bg-gray-50">
@@ -282,23 +297,6 @@
             <div class="p-5 overflow-y-auto flex-grow space-y-4">
                 <!-- 購物車商品列表 -->
                 <div id="cart-items-container" class="divide-y divide-gray-100 space-y-3"></div>
-
-                <!-- 📦 LINE 一鍵綁定區塊 (內嵌於結帳區) -->
-                <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-2">
-                    <div id="line-login-container">
-                        <button type="button" onclick="loginWithLine()" class="w-full bg-[#06C755] hover:bg-[#05b34c] text-white py-2.5 px-4 rounded-xl font-bold transition flex items-center justify-center space-x-2 shadow-sm cursor-pointer">
-                            <i class="fa-brands fa-line text-xl"></i>
-                            <span>一鍵連結 LINE 帳號（自動接收到貨通知）</span>
-                        </button>
-                    </div>
-                    <div id="line-user-info" class="hidden flex items-center space-x-3 bg-white p-2.5 rounded-xl border border-emerald-200">
-                        <img id="line-avatar" class="w-10 h-10 rounded-full border border-emerald-400 shadow-xs" src="" alt="Avatar">
-                        <div class="flex-grow">
-                            <p class="font-bold text-gray-800 text-sm" id="line-name"></p>
-                            <p class="text-xs text-emerald-600 font-bold">✓ 已成功綁定 LINE 帳號，到貨將自動發送通知</p>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- 填寫收件人資訊 -->
                 <div class="space-y-3 pt-2 border-t">
@@ -343,7 +341,40 @@
         </div>
     </div>
 
-    <!-- ==================== 買家訂單查詢與修改彈窗 ==================== -->
+    <!-- ==================== 💡 新增：訂單成功與 LINE 綁定彈窗 ==================== -->
+    <div id="order-success-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 text-center space-y-5">
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mx-auto font-black shadow-inner">
+                ✓
+            </div>
+            <div>
+                <h3 class="font-black text-xl text-gray-900">訂單建立成功！</h3>
+                <p class="text-sm text-gray-500 mt-1">您的訂單編號：<span id="success-order-id" class="font-bold text-indigo-600"></span></p>
+            </div>
+
+            <!-- 📦 LINE 一鍵綁定區塊 (下單後直接綁定此筆訂單) -->
+            <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-left space-y-3">
+                <div id="line-login-container">
+                    <p class="text-xs font-bold text-emerald-900 mb-1">即時接收商品進度與到貨通知：</p>
+                    <button type="button" onclick="loginWithLineAfterOrder()" class="w-full bg-[#06C755] hover:bg-[#05b34c] text-white py-2.5 px-4 rounded-xl font-bold transition flex items-center justify-center space-x-2 shadow-sm cursor-pointer">
+                        <i class="fa-brands fa-line text-xl"></i>
+                        <span>連結 LINE 帳號 (自動對應此訂單)</span>
+                    </button>
+                </div>
+                <div id="line-user-info" class="hidden flex items-center space-x-3 bg-white p-3 rounded-xl border border-emerald-200">
+                    <img id="line-avatar" class="w-10 h-10 rounded-full border border-emerald-400 shadow-xs" src="" alt="Avatar">
+                    <div class="flex-grow">
+                        <p class="font-bold text-gray-800 text-sm" id="line-name"></p>
+                        <p class="text-xs text-emerald-600 font-bold">✓ 此訂單已成功連結 LINE，到貨將自動通知！</p>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="closeOrderSuccessModal()" class="w-full bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 rounded-xl transition cursor-pointer">完成並回首頁</button>
+        </div>
+    </div>
+
+    <!-- ==================== 買家訂單查詢彈窗 ==================== -->
     <div id="buyer-orders-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="p-5 border-b flex justify-between items-center bg-gray-50">
@@ -367,50 +398,16 @@
         </div>
     </div>
 
-    <!-- ==================== 修改訂單彈窗 ==================== -->
-    <div id="edit-order-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="p-5 border-b flex justify-between items-center bg-gray-50">
-                <h3 class="font-black text-lg text-gray-900"><i class="fa-solid fa-pen-to-square text-indigo-600 mr-2"></i>修改訂單資訊</h3>
-                <button onclick="closeEditOrderModal()" class="text-gray-400 hover:text-gray-600 w-8 h-8 rounded-full flex items-center justify-center bg-white shadow-xs cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="p-5 space-y-4 overflow-y-auto flex-grow">
-                <input type="hidden" id="edit-order-id-target">
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 mb-1">收件人姓名 *</label>
-                    <input type="text" id="edit-buyer-name" class="w-full px-3 py-2 border rounded-xl text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 mb-1">聯絡電話 *</label>
-                    <input type="tel" id="edit-buyer-phone" class="w-full px-3 py-2 border rounded-xl text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 mb-1">取貨門市 / 備註</label>
-                    <input type="text" id="edit-buyer-note" class="w-full px-3 py-2 border rounded-xl text-sm">
-                </div>
-                <div class="pt-2 border-t">
-                    <label class="block text-xs font-bold text-gray-600 mb-2">訂單商品明細（可調整數量或刪除）</label>
-                    <div id="edit-order-items-container" class="space-y-2 divide-y divide-gray-100"></div>
-                </div>
-            </div>
-            <div class="p-4 bg-gray-50 border-t flex gap-2">
-                <button onclick="closeEditOrderModal()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2.5 rounded-xl text-sm cursor-pointer">取消</button>
-                <button onclick="saveModifiedOrder()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-sm shadow cursor-pointer">儲存修改</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- JavaScript 核心邏輯 -->
+    <!-- ==================== JavaScript 核心邏輯 ==================== -->
     <script>
-        // ==================== LINE 登入參數設定 ====================
         const LOGIN_CHANNEL_ID = '2012296940';
-        let currentUserLineProfile = null;
+        let currentCreatedOrderId = null; // 紀錄當前剛建立的訂單 ID
 
         const DEFAULT_SETTINGS = {
             brand: "海外代購選物所",
             adminPwd: "1234",
             lineUrl: "",
-            sheetsUrl: "", // 請在此填入您的 GAS Web App 部署網址
+            sheetsUrl: "https://script.google.com/macros/s/AKfycbzaqb6fP1nZ5dFEmPQHHAQm5rt4AZlS5R_aV8uewSB7SzqONU0oHRZxpM58Aw5TTpAo/exec", 
             bankInfo: "中國信託 (822) 帳號：1234-5678-9012 (戶名: 代購選物)",
             countries: ["日本代購 🇯🇵", "韓國代購 🇰🇷", "富國島代購 🇻🇳"],
             shippingMethods: [
@@ -421,12 +418,11 @@
         };
 
         const DEFAULT_PRODUCTS = [
-            { id: "p_1001", name: "日本東京限定抹茶夾心餅乾", country: "日本代購 🇯🇵", price: 380, images: ["https://images.unsplash.com/photo-1558961363-fa8fdf82db35"], desc: "濃郁抹茶夾心，伴手禮首選盒裝。" },
-            { id: "p_1002", name: "韓國熱銷純淨保濕水光面膜 (10入)", country: "韓國代購 🇰🇷", price: 450, images: ["https://images.unsplash.com/photo-1522337360788-8b13dee7a37e"], desc: "深層保濕補水，韓國Olive Young熱銷。" }
+            { id: "p_1001", name: "日本東京限定抹茶夾心餅乾", country: "日本代購 🇯🇵", price: 380, stock: 20, deadline: "", images: ["https://images.unsplash.com/photo-1558961363-fa8fdf82db35"], desc: "濃郁抹茶夾心，伴手禮首選盒裝。" },
+            { id: "p_1002", name: "韓國熱銷純淨保濕水光面膜 (10入)", country: "韓國代購 🇰🇷", price: 450, stock: 15, deadline: "2026-12-31", images: ["https://images.unsplash.com/photo-1522337360788-8b13dee7a37e"], desc: "深層保濕補水，韓國Olive Young熱銷。" }
         ];
 
         let settings = JSON.parse(localStorage.getItem('daigou_settings')) || DEFAULT_SETTINGS;
-        
         let products = JSON.parse(localStorage.getItem('daigou_products')) || DEFAULT_PRODUCTS;
         let orders = JSON.parse(localStorage.getItem('daigou_orders')) || [];
         let cart = JSON.parse(localStorage.getItem('daigou_cart')) || [];
@@ -436,8 +432,9 @@
         let currentUploadedImages = [];
         let viewingProductIndex = null;
 
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
             localStorage.setItem('daigou_admin_logged', 'false');
+            await fetchCloudSettings();
             applySettings();
             switchToBuyerView();
             renderBuyerProducts();
@@ -447,6 +444,22 @@
             renderSettingsPanel();
             updateCartBadge();
         });
+
+        // 🌐 從 Google 試算表 (GAS) 讀取雲端系統設定
+        async function fetchCloudSettings() {
+            if (settings.sheetsUrl) {
+                try {
+                    let res = await fetch(`${settings.sheetsUrl}?action=getSettings`);
+                    let cloudData = await res.json();
+                    if (cloudData && cloudData.brand) {
+                        settings = cloudData;
+                        localStorage.setItem('daigou_settings', JSON.stringify(settings));
+                    }
+                } catch(e) {
+                    console.log("從雲端抓取設定失敗，使用本地備份設定", e);
+                }
+            }
+        }
 
         function applySettings() {
             document.getElementById('brand-title').innerText = settings.brand;
@@ -462,23 +475,40 @@
             }
         }
 
-        // ==================== LINE 一鍵登入與綁定邏輯 ====================
-        function loginWithLine() {
+        // ==================== 💡 修正：送出訂單後再綁定 LINE 帳號 ====================
+        function loginWithLineAfterOrder() {
             if (!settings.sheetsUrl || settings.sheetsUrl.trim() === "") {
-                alert('請先至「賣家後台 > 系統設定」填寫 Google Sheets Web App URL (GAS 網址)，才能進行 LINE 登入授權！');
+                alert('賣家未設定 Google Sheets Web App URL，無法進行 LINE 綁定。');
                 return;
             }
-            const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${LOGIN_CHANNEL_ID}&redirect_uri=${encodeURIComponent(settings.sheetsUrl)}&state=${encodeURIComponent(window.location.href)}&scope=profile%20openid`;
+            // 將當前訂單編號也寫入 state 帶給 GAS 後端
+            const stateData = {
+                url: window.location.href,
+                orderId: currentCreatedOrderId
+            };
+            const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${LOGIN_CHANNEL_ID}&redirect_uri=${encodeURIComponent(settings.sheetsUrl)}&state=${encodeURIComponent(JSON.stringify(stateData))}&scope=profile%20openid`;
             window.open(lineAuthUrl, "LineLogin", "width=500,height=600");
         }
 
+        // 接收來自 LINE 登入授權成功的回調
         window.addEventListener("message", (event) => {
             if (event.data && event.data.action === "lineLoginSuccess") {
-                currentUserLineProfile = event.data.profile;
+                const profile = event.data.profile;
                 document.getElementById("line-login-container").classList.add("hidden");
                 document.getElementById("line-user-info").classList.remove("hidden");
-                document.getElementById("line-avatar").src = currentUserLineProfile.pictureUrl;
-                document.getElementById("line-name").innerText = currentUserLineProfile.displayName;
+                document.getElementById("line-avatar").src = profile.pictureUrl;
+                document.getElementById("line-name").innerText = profile.displayName;
+
+                // 更新 LocalStorage 與記憶體中的該筆訂單 LINE 資訊
+                if (currentCreatedOrderId) {
+                    let targetOrder = orders.find(o => o.id === currentCreatedOrderId);
+                    if (targetOrder) {
+                        targetOrder.lineUserId = profile.userId;
+                        targetOrder.lineDisplayName = profile.displayName;
+                        localStorage.setItem('daigou_orders', JSON.stringify(orders));
+                        renderAdminOrders();
+                    }
+                }
             }
         });
 
@@ -505,9 +535,7 @@
             }
         }
 
-        function closePasswordModal() {
-            document.getElementById('password-modal').classList.add('hidden');
-        }
+        function closePasswordModal() { document.getElementById('password-modal').classList.add('hidden'); }
 
         function adminLogout() {
             isAdminLoggedIn = false;
@@ -538,204 +566,14 @@
             renderBuyerProducts();
         }
 
-        // ==================== 買家訂單查詢與修改邏輯 ====================
-        function openBuyerOrdersModal() {
-            document.getElementById('buyer-orders-modal').classList.remove('hidden');
-            document.getElementById('query-phone-input').value = '';
-            document.getElementById('buyer-orders-result-container').innerHTML = `<div class="text-center py-8 text-gray-400 text-sm">請輸入手機號碼查詢您的歷史訂單紀錄</div>`;
-        }
-
-        function closeBuyerOrdersModal() {
-            document.getElementById('buyer-orders-modal').classList.add('hidden');
-        }
-
-        function searchBuyerOrders() {
-            let phone = document.getElementById('query-phone-input').value.trim();
-            const container = document.getElementById('buyer-orders-result-container');
-            if (!phone) {
-                alert('請輸入手機號碼！');
-                return;
-            }
-
-            let matchedOrders = orders.filter(o => o.phone === phone);
-            if (matchedOrders.length === 0) {
-                container.innerHTML = `<div class="text-center py-8 text-rose-500 font-bold text-sm">找不到手機號碼為「${phone}」的訂單紀錄</div>`;
-                return;
-            }
-
-            let html = '';
-            matchedOrders.forEach((o) => {
-                let itemsList = o.rawItems ? o.rawItems.map(i => `${i.name} x${i.qty} (NT$ ${(i.price * i.qty).toLocaleString()})`).join('<br>') : '無明細';
-                let isPending = (o.status === '待處理');
-                let isTransfer = o.shippingType === 'transfer';
-
-                html += `
-                    <div class="bg-gray-50 border rounded-2xl p-4 space-y-3 shadow-xs">
-                        <div class="flex justify-between items-center border-b pb-2">
-                            <div>
-                                <span class="font-black text-indigo-600">${o.id}</span>
-                                <span class="text-xs text-gray-400 ml-2">${o.date}</span>
-                            </div>
-                            <span class="text-xs font-bold px-2.5 py-1 rounded-full ${o.status === '待處理' ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800'}">${o.status}</span>
-                        </div>
-                        <div class="text-xs space-y-1 text-gray-600">
-                            <p><strong>收件人：</strong>${o.name} (${o.phone})</p>
-                            <p><strong>取貨方式：</strong>${o.shippingName} (運費 $${o.shippingFee})</p>
-                            <p><strong>取貨門市：</strong><span class="font-bold text-indigo-700">${o.storeInfo || '無'}</span></p>
-                            <p><strong>備註：</strong>${o.note || '無'}</p>
-                            
-                            ${isTransfer ? `
-                                <div class="bg-indigo-50 border border-indigo-100 p-3 rounded-xl space-y-2 mt-2">
-                                    <div class="font-bold text-indigo-900"><i class="fa-solid fa-building-columns mr-1"></i> 銀行轉帳資訊：</div>
-                                    <div class="font-mono bg-white p-2 rounded border border-indigo-100 text-gray-800 font-bold">${settings.bankInfo || '尚未設定轉帳帳號'}</div>
-                                    <div class="pt-1 flex items-center gap-2">
-                                        <span class="font-bold text-indigo-900 shrink-0">轉帳後五碼：</span>
-                                        <input type="text" id="bank-last5-${o.id}" value="${o.bankLast5 || ''}" placeholder="請輸入後五碼" class="w-28 px-2 py-1 bg-white border rounded-lg text-xs font-bold">
-                                        <button onclick="saveBankLast5('${o.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer">儲存</button>
-                                    </div>
-                                </div>
-                            ` : ''}
-
-                            <div class="bg-white p-2.5 rounded-xl border mt-2">
-                                <p class="font-bold text-gray-700 mb-1">購買明細：</p>
-                                ${itemsList}
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center pt-2 border-t">
-                            <span class="font-black text-gray-900">總金額: <span class="text-indigo-600">NT$ ${o.total.toLocaleString()}</span></span>
-                            ${isPending ? `
-                                <div class="space-x-2">
-                                    <button onclick="openEditOrderModal('${o.id}')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer"><i class="fa-solid fa-pen mr-1"></i>修改訂單</button>
-                                    <button onclick="cancelBuyerOrder('${o.id}')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer"><i class="fa-solid fa-trash mr-1"></i>取消訂單</button>
-                                </div>
-                            ` : `<span class="text-xs text-gray-400">訂單處理中，如需修改請聯繫客服</span>`}
-                        </div>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
-
-        function saveBankLast5(orderId) {
-            let inputVal = document.getElementById(`bank-last5-${orderId}`).value.trim();
-            let order = orders.find(o => o.id === orderId);
-            if (order) {
-                order.bankLast5 = inputVal;
-                localStorage.setItem('daigou_orders', JSON.stringify(orders));
-                alert('轉帳後五碼已儲存成功！');
-                searchBuyerOrders();
-                renderAdminOrders();
-            }
-        }
-
-        let editingOrderId = null;
-
-        function openEditOrderModal(orderId) {
-            let order = orders.find(o => o.id === orderId);
-            if (!order) return;
-            editingOrderId = orderId;
-
-            document.getElementById('edit-buyer-name').value = order.name;
-            document.getElementById('edit-buyer-phone').value = order.phone;
-            document.getElementById('edit-buyer-note').value = order.note || '';
-
-            let itemsContainer = document.getElementById('edit-order-items-container');
-            let html = '';
-            if (order.rawItems && order.rawItems.length > 0) {
-                order.rawItems.forEach((item, idx) => {
-                    html += `
-                        <div class="flex items-center justify-between py-2 text-xs">
-                            <span class="font-medium text-gray-800 line-clamp-1 flex-grow pr-2">${item.name}</span>
-                            <div class="flex items-center space-x-2 shrink-0">
-                                <span>NT$ ${item.price} x</span>
-                                <input type="number" min="1" value="${item.qty}" onchange="updateEditItemQty(${idx}, this.value)" class="w-12 px-2 py-1 border rounded-lg text-center font-bold">
-                                <button type="button" onclick="removeEditItem(${idx})" class="text-rose-500 hover:text-rose-700 p-1"><i class="fa-solid fa-xmark"></i></button>
-                            </div>
-                        </div>
-                    `;
-                });
-            } else {
-                html = `<p class="text-xs text-gray-400 py-2">無商品明細可修改</p>`;
-            }
-            itemsContainer.innerHTML = html;
-            document.getElementById('edit-order-modal').classList.remove('hidden');
-        }
-
-        function closeEditOrderModal() {
-            document.getElementById('edit-order-modal').classList.add('hidden');
-            editingOrderId = null;
-        }
-
-        function updateEditItemQty(itemIdx, qty) {
-            let order = orders.find(o => o.id === editingOrderId);
-            if (order && order.rawItems[itemIdx]) {
-                order.rawItems[itemIdx].qty = Math.max(1, parseInt(qty) || 1);
-            }
-        }
-
-        function removeEditItem(itemIdx) {
-            let order = orders.find(o => o.id === editingOrderId);
-            if (order && order.rawItems) {
-                order.rawItems.splice(itemIdx, 1);
-                openEditOrderModal(editingOrderId);
-            }
-        }
-
-        function saveModifiedOrder() {
-            let order = orders.find(o => o.id === editingOrderId);
-            if (!order) return;
-
-            let name = document.getElementById('edit-buyer-name').value.trim();
-            let phone = document.getElementById('edit-buyer-phone').value.trim();
-            let note = document.getElementById('edit-buyer-note').value.trim();
-
-            if (!name || !phone) {
-                alert('請完整填寫收件人姓名與電話！');
-                return;
-            }
-
-            if (!order.rawItems || order.rawItems.length === 0) {
-                alert('訂單內至少需保留一項商品！');
-                return;
-            }
-
-            order.name = name;
-            order.phone = phone;
-            order.note = note;
-            
-            let subtotal = order.rawItems.reduce((sum, i) => sum + (i.price * i.qty), 0);
-            order.total = subtotal + order.shippingFee;
-
-            localStorage.setItem('daigou_orders', JSON.stringify(orders));
-            alert('訂單修改成功！');
-            closeEditOrderModal();
-            searchBuyerOrders();
-            renderAdminOrders();
-        }
-
-        function cancelBuyerOrder(orderId) {
-            if (confirm('確定要取消這筆訂單嗎？取消後無法復原。')) {
-                let idx = orders.findIndex(o => o.id === orderId);
-                if (idx !== -1) {
-                    orders.splice(idx, 1);
-                    localStorage.setItem('daigou_orders', JSON.stringify(orders));
-                    alert('訂單已成功取消。');
-                    searchBuyerOrders();
-                    renderAdminOrders();
-                }
-            }
-        }
-
         // ==================== 買家商品與購物車邏輯 ====================
         function handleMultipleImages(e) {
             const files = Array.from(e.target.files);
             if (files.length === 0) return;
-
             if (currentUploadedImages.length + files.length > 5) {
                 alert('最多只能上傳 5 張照片！');
                 return;
             }
-
             files.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(evt) {
@@ -749,18 +587,15 @@
         function renderImagePreviews() {
             const container = document.getElementById('multi-img-preview-container');
             document.getElementById('img-count-badge').innerText = currentUploadedImages.length;
-            
             if (currentUploadedImages.length === 0) {
                 container.innerHTML = `<p class="text-xs text-gray-400">尚未選擇照片</p>`;
                 return;
             }
-
             let html = '';
             currentUploadedImages.forEach((imgSrc, idx) => {
                 html += `
                     <div class="relative w-20 h-20 bg-gray-100 rounded-xl overflow-hidden border shadow-xs">
                         <img src="${imgSrc}" class="w-full h-full object-cover">
-                        ${idx === 0 ? '<span class="absolute bottom-0 inset-x-0 bg-indigo-600/80 text-white text-[9px] font-bold text-center py-0.5">代表圖</span>' : ''}
                         <button type="button" onclick="removeUploadedImg(${idx})" class="absolute top-1 right-1 bg-rose-600 text-white w-5 h-5 rounded-full text-[10px] flex items-center justify-center shadow cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                 `;
@@ -791,6 +626,7 @@
         function renderBuyerProducts() {
             const grid = document.getElementById('buyer-product-grid');
             const keyword = document.getElementById('search-input').value.toLowerCase();
+            const today = new Date().toISOString().split('T')[0];
             
             let filtered = products.filter(p => {
                 let matchCat = (currentCategory === '全部' || p.country === currentCategory);
@@ -808,23 +644,42 @@
                 let realIndex = products.findIndex(item => String(item.id) === String(p.id));
                 let mainImg = (p.images && p.images.length > 0) ? p.images[0] : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff';
                 
+                let stockNum = p.stock !== undefined ? parseInt(p.stock) : 99;
+                let isExpired = p.deadline && p.deadline < today;
+                let isSoldOut = stockNum <= 0;
+                let canBuy = !isExpired && !isSoldOut;
+
+                let statusBadge = '';
+                if (isExpired) {
+                    statusBadge = `<span class="absolute top-3 right-3 bg-rose-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-xs">已截止登記</span>`;
+                } else if (isSoldOut) {
+                    statusBadge = `<span class="absolute top-3 right-3 bg-gray-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-xs">已售完</span>`;
+                }
+
                 html += `
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col group hover:shadow-md transition cursor-pointer" onclick="openProductDetailByIndex(${realIndex})">
                         <div class="relative aspect-square overflow-hidden bg-gray-100">
                             <img src="${mainImg}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
                             <span class="absolute top-3 left-3 bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold px-2.5 py-1 rounded-full">${p.country}</span>
-                            ${p.images && p.images.length > 1 ? `<span class="absolute bottom-3 right-3 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full"><i class="fa-regular fa-images mr-1"></i>${p.images.length}張</span>` : ''}
+                            ${statusBadge}
                         </div>
                         <div class="p-4 flex flex-col flex-grow justify-between">
                             <div>
                                 <h4 class="font-bold text-gray-900 text-sm line-clamp-1 mb-1">${p.name}</h4>
-                                <p class="text-xs text-gray-500 line-clamp-2 mb-3">${p.desc || '無詳細說明'}</p>
+                                <p class="text-xs text-gray-500 line-clamp-2 mb-2">${p.desc || '無詳細說明'}</p>
                             </div>
-                            <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-                                <span class="text-base font-black text-indigo-600">NT$ ${p.price.toLocaleString()}</span>
-                                <button type="button" onclick="event.stopPropagation(); addToCartByIndex(${realIndex}, 1)" class="bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1 cursor-pointer">
-                                    <i class="fa-solid fa-cart-plus"></i><span>加購</span>
-                                </button>
+                            <div>
+                                <div class="text-[11px] text-gray-400 flex justify-between mb-2 font-medium">
+                                    <span>剩餘庫存: ${stockNum}</span>
+                                    <span>${p.deadline ? '截止: ' + p.deadline : ''}</span>
+                                </div>
+                                <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                                    <span class="text-base font-black text-indigo-600">NT$ ${p.price.toLocaleString()}</span>
+                                    <button type="button" onclick="event.stopPropagation(); addToCartByIndex(${realIndex}, 1)" ${canBuy ? '' : 'disabled'} class="${canBuy ? 'bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white cursor-pointer' : 'bg-gray-100 text-gray-400 cursor-not-allowed'} px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1">
+                                        <i class="fa-solid ${isExpired ? 'fa-calendar-xmark' : (isSoldOut ? 'fa-ban' : 'fa-cart-plus')}"></i>
+                                        <span>${isExpired ? '已截止' : (isSoldOut ? '售完' : '加購')}</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -838,6 +693,12 @@
             if (!p) return;
             viewingProductIndex = index;
 
+            const today = new Date().toISOString().split('T')[0];
+            let stockNum = p.stock !== undefined ? parseInt(p.stock) : 99;
+            let isExpired = p.deadline && p.deadline < today;
+            let isSoldOut = stockNum <= 0;
+            let canBuy = !isExpired && !isSoldOut;
+
             document.getElementById('modal-p-name').innerText = p.name;
             document.getElementById('modal-p-title').innerText = p.name;
             document.getElementById('modal-p-country').innerText = p.country;
@@ -845,61 +706,97 @@
             document.getElementById('modal-p-desc').innerText = p.desc || '暫無詳細描述';
             document.getElementById('modal-qty-input').value = 1;
 
+            const badgeContainer = document.getElementById('modal-p-status-badge');
+            let infoText = `<span class="text-xs text-gray-500 font-bold mr-3">剩餘庫存：${stockNum}</span>`;
+            if (p.deadline) infoText += `<span class="text-xs text-gray-500 font-bold">登記截止日：${p.deadline}</span>`;
+            
+            if (isExpired) {
+                badgeContainer.innerHTML = `${infoText} <span class="ml-2 bg-rose-100 text-rose-700 text-xs px-2 py-0.5 rounded font-bold">已截止登記</span>`;
+            } else if (isSoldOut) {
+                badgeContainer.innerHTML = `${infoText} <span class="ml-2 bg-gray-200 text-gray-700 text-xs px-2 py-0.5 rounded font-bold">已售完</span>`;
+            } else {
+                badgeContainer.innerHTML = infoText;
+            }
+
+            const addBtn = document.getElementById('modal-add-cart-btn');
+            if (canBuy) {
+                addBtn.disabled = false;
+                addBtn.className = "w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow transition cursor-pointer flex items-center justify-center space-x-2";
+                addBtn.innerHTML = `<i class="fa-solid fa-cart-plus"></i><span>加入購物車</span>`;
+            } else {
+                addBtn.disabled = true;
+                addBtn.className = "w-full bg-gray-200 text-gray-400 font-bold py-3 rounded-xl cursor-not-allowed flex items-center justify-center space-x-2";
+                addBtn.innerHTML = `<i class="fa-solid ${isExpired ? 'fa-calendar-xmark' : 'fa-ban'}"></i><span>${isExpired ? '此商品已截止登記' : '此商品已售完'}</span>`;
+            }
+
             let imgs = (p.images && p.images.length > 0) ? p.images : ['https://images.unsplash.com/photo-1542291026-7eec264c27ff'];
             document.getElementById('modal-main-img').src = imgs[0];
-
-            let thumbHtml = '';
-            imgs.forEach((img) => {
-                thumbHtml += `<img src="${img}" onclick="document.getElementById('modal-main-img').src='${img}'" class="w-16 h-16 object-cover rounded-xl border-2 hover:border-indigo-600 cursor-pointer shrink-0">`;
-            });
-            document.getElementById('modal-thumb-list').innerHTML = thumbHtml;
+            
+            const thumbContainer = document.getElementById('modal-thumb-list');
+            if (imgs.length > 1) {
+                thumbContainer.innerHTML = imgs.map(img => `
+                    <img src="${img}" onclick="document.getElementById('modal-main-img').src='${img}'" class="w-12 h-12 object-cover rounded-lg border cursor-pointer hover:opacity-80">
+                `).join('');
+            } else {
+                thumbContainer.innerHTML = '';
+            }
 
             document.getElementById('product-detail-modal').classList.remove('hidden');
         }
 
-        function closeProductModal() {
-            document.getElementById('product-detail-modal').classList.add('hidden');
-        }
-
         function changeModalQuantity(delta) {
             let input = document.getElementById('modal-qty-input');
-            let val = parseInt(input.value) || 1;
-            val += delta;
+            let current = parseInt(input.value) || 1;
+            let val = current + delta;
+            
+            if (viewingProductIndex !== null) {
+                let p = products[viewingProductIndex];
+                let maxStock = p.stock !== undefined ? parseInt(p.stock) : 99;
+                if (val > maxStock) {
+                    alert(`加購數量不能超過剩餘庫存量 (${maxStock})！`);
+                    val = maxStock;
+                }
+            }
+
             if (val < 1) val = 1;
             input.value = val;
         }
 
         function addCurrentViewingProductToCart() {
-            let qtyInput = document.getElementById('modal-qty-input');
-            let quantity = parseInt(qtyInput.value) || 1;
-            if (quantity < 1) quantity = 1;
-
-            if (viewingProductIndex !== null && products[viewingProductIndex]) {
-                addToCartByIndex(viewingProductIndex, quantity);
+            if (viewingProductIndex !== null) {
+                let qty = parseInt(document.getElementById('modal-qty-input').value) || 1;
+                addToCartByIndex(viewingProductIndex, qty);
                 closeProductModal();
             }
         }
+
+        function closeProductModal() { document.getElementById('product-detail-modal').classList.add('hidden'); }
 
         function addToCartByIndex(index, quantity = 1) {
             let prod = products[index];
             if (!prod) return;
 
-            let mainImg = (prod.images && prod.images.length > 0) ? prod.images[0] : '';
+            const today = new Date().toISOString().split('T')[0];
+            if (prod.deadline && prod.deadline < today) {
+                alert('該商品已超過登記截止日期，無法下單！');
+                return;
+            }
+
+            let maxStock = prod.stock !== undefined ? parseInt(prod.stock) : 99;
             let exist = cart.find(item => String(item.id) === String(prod.id));
+            let currentCartQty = exist ? exist.qty : 0;
 
-            if (exist) {
-                exist.qty += quantity;
-            } else {
-                cart.push({ id: prod.id, name: prod.name, price: prod.price, image: mainImg, qty: quantity });
+            if (currentCartQty + quantity > maxStock) {
+                alert(`無法加入！目前購物車已有 ${currentCartQty} 件，商品剩餘庫存僅為 ${maxStock} 件。`);
+                return;
             }
 
-            try {
-                saveCart();
-                updateCartBadge();
-                alert(`已成功將 ${quantity} 件「${prod.name}」加入購物車！`);
-            } catch (e) {
-                alert('瀏覽器儲存空間已滿，請上傳較小張的商品圖片！');
-            }
+            let mainImg = (prod.images && prod.images.length > 0) ? prod.images[0] : '';
+            if (exist) { exist.qty += quantity; } 
+            else { cart.push({ id: prod.id, name: prod.name, price: prod.price, image: mainImg, qty: quantity }); }
+
+            saveCart(); updateCartBadge();
+            alert(`已成功將 ${quantity} 件「${prod.name}」加入購物車！`);
         }
 
         function saveCart() { localStorage.setItem('daigou_cart', JSON.stringify(cart)); }
@@ -943,8 +840,17 @@
         }
 
         function changeQty(index, delta) {
-            cart[index].qty += delta;
-            if (cart[index].qty <= 0) cart.splice(index, 1);
+            let item = cart[index];
+            let prod = products.find(p => String(p.id) === String(item.id));
+            if (delta > 0 && prod) {
+                let maxStock = prod.stock !== undefined ? parseInt(prod.stock) : 99;
+                if (item.qty + 1 > maxStock) {
+                    alert(`已達庫存上限 (${maxStock})！`);
+                    return;
+                }
+            }
+            item.qty += delta;
+            if (item.qty <= 0) cart.splice(index, 1);
             saveCart(); updateCartBadge(); renderCartItems(); updateCartTotal();
         }
 
@@ -980,6 +886,7 @@
             }
         }
 
+        // 💡 修正：先送出訂單 ➔ 扣庫存 ➔ 跳出成功彈窗引導綁定 LINE
         async function submitOrder() {
             if (cart.length === 0) { alert('購物車是空的！'); return; }
             let name = document.getElementById('buyer-name').value.trim();
@@ -997,9 +904,23 @@
                 return;
             }
 
+            // 檢查並扣減庫存
+            for (let item of cart) {
+                let prod = products.find(p => String(p.id) === String(item.id));
+                if (prod && prod.stock !== undefined) {
+                    if (prod.stock < item.qty) {
+                        alert(`商品「${prod.name}」剩餘庫存不足，無法完成訂單！`);
+                        return;
+                    }
+                    prod.stock -= item.qty;
+                }
+            }
+            localStorage.setItem('daigou_products', JSON.stringify(products));
+
             let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             let total = subtotal + shippingObj.fee;
             let orderId = 'ORD-' + Date.now().toString().slice(-6);
+            currentCreatedOrderId = orderId; // 記錄下來給後續 LINE 綁定對應
 
             let newOrder = {
                 id: orderId, 
@@ -1007,13 +928,10 @@
                 name, 
                 phone,
                 shippingName: shippingObj.name,
-                shippingType: shippingObj.type,
                 shippingFee: shippingObj.fee,
                 storeInfo: storeInfo || '面交自取',
-                note: note,
-                bankLast5: "",
-                lineUserId: currentUserLineProfile ? currentUserLineProfile.userId : '',
-                lineDisplayName: currentUserLineProfile ? currentUserLineProfile.displayName : '',
+                lineUserId: '',
+                lineDisplayName: '',
                 rawItems: cart.map(i => ({ name: i.name, qty: i.qty, price: i.price })),
                 total, 
                 status: '待處理'
@@ -1022,6 +940,7 @@
             orders.unshift(newOrder);
             localStorage.setItem('daigou_orders', JSON.stringify(orders));
 
+            // 送出給 GAS 後端寫入試算表
             if (settings.sheetsUrl) {
                 try {
                     await fetch(settings.sheetsUrl, { 
@@ -1033,9 +952,20 @@
                 } catch(e) { console.log(e); }
             }
 
+            // 清空購物車與重置 UI
             cart = []; saveCart(); updateCartBadge(); closeCartModal();
-            alert(`訂單送出成功！訂單編號：${orderId}\n您可以點擊頂部的「我的訂單查詢」查看匯款資訊與填寫後五碼。`);
+            renderBuyerProducts();
             renderAdminOrders();
+
+            // 顯示訂單成功彈窗
+            document.getElementById('success-order-id').innerText = orderId;
+            document.getElementById('line-login-container').classList.remove('hidden');
+            document.getElementById('line-user-info').classList.add('hidden');
+            document.getElementById('order-success-modal').classList.remove('hidden');
+        }
+
+        function closeOrderSuccessModal() {
+            document.getElementById('order-success-modal').classList.add('hidden');
         }
 
         // ==================== 賣家後台邏輯 ====================
@@ -1048,65 +978,47 @@
             document.getElementById(`tab-btn-${tab}`).className = "px-6 py-3 font-bold text-indigo-600 border-b-2 border-indigo-600 whitespace-nowrap cursor-pointer";
         }
 
-        function renderAdminProducts() {
-            const tbody = document.getElementById('admin-product-table');
-            document.getElementById('product-count').innerText = products.length;
-            const select = document.getElementById('p-country');
-            select.innerHTML = settings.countries.map(c => `<option value="${c}">${c}</option>`).join('');
-
-            if (products.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400">尚無商品</td></tr>`; return; }
-            
-            let html = '';
-            products.forEach((p, idx) => {
-                let mainImg = (p.images && p.images.length > 0) ? p.images[0] : '';
-                html += `
-                    <tr class="hover:bg-gray-50">
-                        <td class="p-3"><img src="${mainImg}" class="w-10 h-10 object-cover rounded-lg border"></td>
-                        <td class="p-3 font-bold text-gray-800">${p.name}</td>
-                        <td class="p-3"><span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs font-bold">${p.country}</span></td>
-                        <td class="p-3 font-bold text-indigo-600">NT$ ${p.price.toLocaleString()}</td>
-                        <td class="p-3 text-right space-x-2">
-                            <button onclick="editProductByIndex(${idx})" class="text-indigo-600 font-bold text-xs cursor-pointer"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="deleteProductByIndex(${idx})" class="text-rose-500 font-bold text-xs cursor-pointer"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-        }
-
         function saveProduct(e) {
             e.preventDefault();
-            let id = document.getElementById('edit-product-id').value;
-            let name = document.getElementById('p-name').value;
+            let editId = document.getElementById('edit-product-id').value;
+            let name = document.getElementById('p-name').value.trim();
             let country = document.getElementById('p-country').value;
-            let price = Number(document.getElementById('p-price').value);
-            let desc = document.getElementById('p-desc').value;
+            let price = parseInt(document.getElementById('p-price').value) || 0;
+            let stock = parseInt(document.getElementById('p-stock').value);
+            if (isNaN(stock)) stock = 10;
+            let deadline = document.getElementById('p-deadline').value;
+            let desc = document.getElementById('p-desc').value.trim();
 
-            if (currentUploadedImages.length === 0) {
-                alert('請至少上傳 1 張商品照片！');
+            if (currentUploadedImages.length === 0 && !editId) {
+                alert('請至少選擇 1 張商品照片！');
                 return;
             }
 
-            if (id) {
-                let idx = products.findIndex(p => String(p.id) === String(id));
-                if (idx !== -1) {
-                    products[idx] = { id: id, name, country, price, images: [...currentUploadedImages], desc };
+            if (editId) {
+                let p = products.find(item => String(item.id) === String(editId));
+                if (p) {
+                    p.name = name;
+                    p.country = country;
+                    p.price = price;
+                    p.stock = stock;
+                    p.deadline = deadline;
+                    p.desc = desc;
+                    if (currentUploadedImages.length > 0) p.images = [...currentUploadedImages];
                 }
             } else {
-                let newProd = { id: 'p_' + Date.now(), name, country, price, images: [...currentUploadedImages], desc };
-                products.push(newProd);
+                let newProd = {
+                    id: "p_" + Date.now(),
+                    name, country, price, stock, deadline, desc,
+                    images: [...currentUploadedImages]
+                };
+                products.unshift(newProd);
             }
 
-            try {
-                localStorage.setItem('daigou_products', JSON.stringify(products));
-                resetProductForm();
-                renderAdminProducts();
-                renderBuyerProducts();
-                alert('商品上架成功！');
-            } catch (err) {
-                alert('儲存失敗：上傳的照片檔案總容量過大，請嘗試上傳較小張的圖片！');
-            }
+            localStorage.setItem('daigou_products', JSON.stringify(products));
+            resetProductForm();
+            renderAdminProducts();
+            renderBuyerProducts();
+            alert(editId ? '商品資料修改成功！' : '新商品已上架！');
         }
 
         function editProductByIndex(idx) {
@@ -1116,12 +1028,14 @@
             document.getElementById('p-name').value = p.name;
             document.getElementById('p-country').value = p.country;
             document.getElementById('p-price').value = p.price;
+            document.getElementById('p-stock').value = p.stock !== undefined ? p.stock : 10;
+            document.getElementById('p-deadline').value = p.deadline || '';
             document.getElementById('p-desc').value = p.desc || '';
-            
+
             currentUploadedImages = p.images ? [...p.images] : [];
             renderImagePreviews();
 
-            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-indigo-600 mr-2"></i>編輯商品`;
+            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-[#f59e0b] fa-pen-to-square text-amber-500 mr-2"></i>編輯商品資料`;
             document.getElementById('cancel-edit-btn').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -1131,15 +1045,46 @@
             document.getElementById('edit-product-id').value = '';
             currentUploadedImages = [];
             renderImagePreviews();
-            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-circle-plus text-indigo-600 mr-2"></i>上架新商品`;
+            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-circle-plus text-indigo-600 mr-2"></i>上架新商品 (建議上傳 1MB 以下照片)`;
             document.getElementById('cancel-edit-btn').classList.add('hidden');
         }
 
+        function renderAdminProducts() {
+            const tbody = document.getElementById('admin-product-table');
+            document.getElementById('product-count').innerText = products.length;
+            const select = document.getElementById('p-country');
+            select.innerHTML = settings.countries.map(c => `<option value="${c}">${c}</option>`).join('');
+
+            if (products.length === 0) { tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">尚無商品</td></tr>`; return; }
+            let html = '';
+            products.forEach((p, idx) => {
+                let mainImg = (p.images && p.images.length > 0) ? p.images[0] : '';
+                let stockNum = p.stock !== undefined ? p.stock : 10;
+                let deadlineStr = p.deadline || '無限制';
+                html += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-3"><img src="${mainImg}" class="w-10 h-10 object-cover rounded-lg border"></td>
+                        <td class="p-3 font-bold text-gray-800">${p.name}</td>
+                        <td class="p-3"><span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs font-bold">${p.country}</span></td>
+                        <td class="p-3 font-bold text-indigo-600">NT$ ${p.price.toLocaleString()}</td>
+                        <td class="p-3 font-bold ${stockNum <= 0 ? 'text-rose-600' : 'text-gray-700'}">${stockNum}</td>
+                        <td class="p-3 text-xs text-gray-500">${deadlineStr}</td>
+                        <td class="p-3 text-right space-x-2">
+                            <button onclick="editProductByIndex(${idx})" class="text-amber-600 font-bold text-xs cursor-pointer"><i class="fa-solid fa-pen"></i> 編輯</button>
+                            <button onclick="deleteProductByIndex(${idx})" class="text-rose-500 font-bold text-xs cursor-pointer"><i class="fa-solid fa-trash"></i> 刪除</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
         function deleteProductByIndex(idx) {
-            if (confirm('確定要刪除此商品嗎？')) {
+            if (confirm(`確定要刪除商品「${products[idx].name}」嗎？`)) {
                 products.splice(idx, 1);
                 localStorage.setItem('daigou_products', JSON.stringify(products));
-                renderAdminProducts(); renderBuyerProducts();
+                renderAdminProducts();
+                renderBuyerProducts();
             }
         }
 
@@ -1152,13 +1097,12 @@
             orders.forEach((o, index) => {
                 let detailsStr = o.rawItems ? o.rawItems.map(i => `${i.name} x${i.qty}`).join('<br>') : '';
                 let lineStatus = o.lineUserId ? `<span class="text-emerald-600 font-bold">🟢 ${o.lineDisplayName || '已綁定'}</span>` : `<span class="text-gray-400">未綁定</span>`;
-                let shippingInfo = `${o.shippingName || '寄送'} <br><span class="font-bold text-indigo-700">門市: ${o.storeInfo || '無'}</span><br><span class="text-gray-400">LINE: ${lineStatus}</span>`;
 
                 html += `
                     <tr class="hover:bg-gray-50">
                         <td class="p-3"><span class="font-bold text-indigo-600">${o.id}</span><div class="text-xs text-gray-400">${o.date}</div></td>
                         <td class="p-3"><div class="font-bold text-gray-800">${o.name}</div><div class="text-xs text-gray-500">${o.phone}</div></td>
-                        <td class="p-3 text-xs text-gray-600">${shippingInfo}</td>
+                        <td class="p-3 text-xs text-gray-600">${o.shippingName || ''}<br><span class="font-bold text-indigo-700">${o.storeInfo}</span><br>LINE: ${lineStatus}</td>
                         <td class="p-3 text-xs text-gray-700">${detailsStr}</td>
                         <td class="p-3 font-bold text-indigo-600">NT$ ${o.total.toLocaleString()}</td>
                         <td class="p-3">
@@ -1176,47 +1120,24 @@
             tbody.innerHTML = html;
         }
 
-        // 賣家後台修改狀態並同步觸發 GAS 發送 LINE 通知
         async function updateOrderStatusFromAdmin(index, newStatus) {
             orders[index].status = newStatus;
             localStorage.setItem('daigou_orders', JSON.stringify(orders));
-            
             let targetOrder = orders[index];
-            if (settings.sheetsUrl && targetOrder.lineUserId && (newStatus === '已到貨' || newStatus === '運送中')) {
+
+            if (settings.sheetsUrl && (newStatus === '已到貨' || newStatus === '運送中')) {
                 try {
                     await fetch(settings.sheetsUrl, {
                         method: 'POST',
                         mode: 'no-cors',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'updateOrderStatus',
-                            orderId: targetOrder.id,
-                            newStatus: newStatus
-                        })
+                        body: JSON.stringify({ action: 'updateOrderStatus', orderId: targetOrder.id, newStatus: newStatus })
                     });
-                    alert(`狀態已更新為【${newStatus}】，並已自動發送 LINE 到貨通知給買家！`);
-                } catch(e) {
-                    console.log(e);
-                    alert('狀態已更新，但 LINE 通知發送失敗，請檢查 GAS 網址');
-                }
-            } else {
-                alert('訂單狀態已更新！');
-            }
+                    alert(`狀態已更新為【${newStatus}】，並已觸發 LINE 到貨通知給買家！`);
+                } catch(e) { alert('狀態已更新，但 LINE 通知觸發失敗。'); }
+            } else { alert('訂單狀態已更新！'); }
             renderAdminOrders();
         }
-
-        function exportOrdersCSV() {
-            if (orders.length === 0) { alert('沒有訂單可匯出'); return; }
-            let csv = "\uFEFF訂單編號,下單時間,買家姓名,電話,取貨方式,取貨門市,LINE綁定,商品明細,總金額,狀態\n";
-            orders.forEach(o => {
-                let itemsStr = o.rawItems ? o.rawItems.map(i => `${i.name} x${i.qty}`).join('; ') : '';
-                csv += `${o.id},"${o.date}","${o.name}","${o.phone}","${o.shippingName || ''}","${o.storeInfo || ''}","${o.lineDisplayName || '未綁定'}","${itemsStr}",${o.total},${o.status}\n`;
-            });
-            let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `訂單_${Date.now()}.csv`; a.click();
-        }
-
-        function clearOrders() { if (confirm('確定清空訂單？')) { orders = []; localStorage.setItem('daigou_orders', JSON.stringify(orders)); renderAdminOrders(); } }
 
         function renderSettingsPanel() {
             document.getElementById('setting-brand').value = settings.brand;
@@ -1231,15 +1152,35 @@
             `).join('');
         }
 
-        function saveBasicSettings() {
+        async function saveBasicSettings() {
             settings.brand = document.getElementById('setting-brand').value.trim() || "海外代購選物所";
             settings.lineUrl = document.getElementById('setting-line-url').value.trim();
             settings.sheetsUrl = document.getElementById('setting-sheets-url').value.trim();
             settings.bankInfo = document.getElementById('setting-bank-info').value.trim();
             let newPwd = document.getElementById('setting-admin-pwd').value.trim();
             if (newPwd) settings.adminPwd = newPwd;
+
             localStorage.setItem('daigou_settings', JSON.stringify(settings));
-            applySettings(); alert('設定已儲存！');
+            applySettings();
+
+            if (settings.sheetsUrl) {
+                try {
+                    await fetch(settings.sheetsUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'saveSettings',
+                            settingsJson: JSON.stringify(settings)
+                        })
+                    });
+                    alert('設定已儲存並成功同步至雲端！手機與電腦將同步使用最新設定。');
+                } catch(e) {
+                    alert('已儲存至本機，但雲端同步失敗，請檢查 GAS 網址。');
+                }
+            } else {
+                alert('設定已儲存！');
+            }
         }
 
         function addCountry() {
@@ -1249,6 +1190,67 @@
             localStorage.setItem('daigou_settings', JSON.stringify(settings));
             document.getElementById('new-country-input').value = '';
             renderSettingsPanel(); renderCategoryFilters(); renderAdminProducts();
+        }
+
+        function openBuyerOrdersModal() {
+            document.getElementById('buyer-orders-modal').classList.remove('hidden');
+            document.getElementById('query-phone-input').value = '';
+            document.getElementById('buyer-orders-result-container').innerHTML = `<div class="text-center py-8 text-gray-400 text-sm">請輸入手機號碼查詢您的歷史訂單紀錄</div>`;
+        }
+
+        function closeBuyerOrdersModal() { document.getElementById('buyer-orders-modal').classList.add('hidden'); }
+
+        function searchBuyerOrders() {
+            let phone = document.getElementById('query-phone-input').value.trim();
+            const container = document.getElementById('buyer-orders-result-container');
+            if (!phone) { alert('請輸入手機號碼！'); return; }
+
+            let matched = orders.filter(o => o.phone === phone);
+            if (matched.length === 0) {
+                container.innerHTML = `<div class="text-center py-8 text-rose-500 font-bold text-sm">找不到手機號碼為「${phone}」的訂單紀錄</div>`;
+                return;
+            }
+
+            let html = '';
+            matched.forEach((o) => {
+                let itemsList = o.rawItems ? o.rawItems.map(i => `${i.name} x${i.qty}`).join('<br>') : '';
+                html += `
+                    <div class="bg-gray-50 border rounded-2xl p-4 space-y-2 text-xs">
+                        <div class="flex justify-between font-bold border-b pb-2">
+                            <span class="text-indigo-600">${o.id}</span>
+                            <span class="px-2 py-0.5 rounded-full ${o.status === '待處理' ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800'}">${o.status}</span>
+                        </div>
+                        <p><strong>取貨門市：</strong>${o.storeInfo}</p>
+                        <p><strong>商品明細：</strong><br>${itemsList}</p>
+                        <p class="font-black text-sm text-right text-gray-900 pt-1">總金額：NT$ ${o.total.toLocaleString()}</p>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function exportOrdersCSV() {
+            if (orders.length === 0) { alert('目前沒有訂單可匯出！'); return; }
+            let csvContent = "\uFEFF訂單編號,下單時間,買家姓名,電話,取貨方式/門市,商品明細,總金額,訂單狀態\n";
+            orders.forEach(o => {
+                let details = o.rawItems ? o.rawItems.map(i => `${i.name}*${i.qty}`).join(';') : '';
+                csvContent += `"${o.id}","${o.date}","${o.name}","${o.phone}","${o.shippingName || ''} ${o.storeInfo}","${details}","${o.total}","${o.status}"\n`;
+            });
+            let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            let link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", `代購訂單列表_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function clearOrders() {
+            if (confirm('確定要清空所有買家訂單紀錄嗎？此動作無法復原！')) {
+                orders = [];
+                localStorage.setItem('daigou_orders', JSON.stringify(orders));
+                renderAdminOrders();
+            }
         }
     </script>
 </body>
