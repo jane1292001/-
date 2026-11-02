@@ -341,7 +341,7 @@
         </div>
     </div>
 
-    <!-- ==================== 💡 新增：訂單成功與 LINE 綁定彈窗 ==================== -->
+    <!-- ==================== 訂單成功與 LINE 綁定彈窗 ==================== -->
     <div id="order-success-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 text-center space-y-5">
             <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mx-auto font-black shadow-inner">
@@ -401,7 +401,7 @@
     <!-- ==================== JavaScript 核心邏輯 ==================== -->
     <script>
         const LOGIN_CHANNEL_ID = '2012296940';
-        let currentCreatedOrderId = null; // 紀錄當前剛建立的訂單 ID
+        let currentCreatedOrderId = null; 
 
         const DEFAULT_SETTINGS = {
             brand: "海外代購選物所",
@@ -435,6 +435,7 @@
         window.addEventListener('DOMContentLoaded', async () => {
             localStorage.setItem('daigou_admin_logged', 'false');
             await fetchCloudSettings();
+            await fetchCloudProducts();
             applySettings();
             switchToBuyerView();
             renderBuyerProducts();
@@ -461,6 +462,42 @@
             }
         }
 
+        // 🌐 從雲端讀取商品總表
+        async function fetchCloudProducts() {
+            if (settings.sheetsUrl) {
+                try {
+                    let res = await fetch(`${settings.sheetsUrl}?action=getProducts`);
+                    let cloudProducts = await res.json();
+                    if (Array.isArray(cloudProducts) && cloudProducts.length > 0) {
+                        products = cloudProducts;
+                        localStorage.setItem('daigou_products', JSON.stringify(products));
+                    }
+                } catch(e) {
+                    console.log("從雲端載入商品失敗", e);
+                }
+            }
+        }
+
+        // ☁️ 將商品總表同步推送到雲端
+        async function syncProductsToCloud() {
+            if (settings.sheetsUrl) {
+                try {
+                    await fetch(settings.sheetsUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'saveProducts',
+                            productsJson: JSON.stringify(products)
+                        })
+                    });
+                    console.log("商品已成功同步至雲端");
+                } catch(e) {
+                    console.log("商品雲端同步失敗", e);
+                }
+            }
+        }
+
         function applySettings() {
             document.getElementById('brand-title').innerText = settings.brand;
             document.getElementById('page-title').innerText = settings.brand;
@@ -475,13 +512,12 @@
             }
         }
 
-        // ==================== 💡 修正：送出訂單後再綁定 LINE 帳號 ====================
+        // ==================== 送出訂單後再綁定 LINE 帳號 ====================
         function loginWithLineAfterOrder() {
             if (!settings.sheetsUrl || settings.sheetsUrl.trim() === "") {
                 alert('賣家未設定 Google Sheets Web App URL，無法進行 LINE 綁定。');
                 return;
             }
-            // 將當前訂單編號也寫入 state 帶給 GAS 後端
             const stateData = {
                 url: window.location.href,
                 orderId: currentCreatedOrderId
@@ -490,7 +526,6 @@
             window.open(lineAuthUrl, "LineLogin", "width=500,height=600");
         }
 
-        // 接收來自 LINE 登入授權成功的回調
         window.addEventListener("message", (event) => {
             if (event.data && event.data.action === "lineLoginSuccess") {
                 const profile = event.data.profile;
@@ -499,7 +534,6 @@
                 document.getElementById("line-avatar").src = profile.pictureUrl;
                 document.getElementById("line-name").innerText = profile.displayName;
 
-                // 更新 LocalStorage 與記憶體中的該筆訂單 LINE 資訊
                 if (currentCreatedOrderId) {
                     let targetOrder = orders.find(o => o.id === currentCreatedOrderId);
                     if (targetOrder) {
@@ -886,7 +920,6 @@
             }
         }
 
-        // 💡 修正：先送出訂單 ➔ 扣庫存 ➔ 跳出成功彈窗引導綁定 LINE
         async function submitOrder() {
             if (cart.length === 0) { alert('購物車是空的！'); return; }
             let name = document.getElementById('buyer-name').value.trim();
@@ -916,11 +949,12 @@
                 }
             }
             localStorage.setItem('daigou_products', JSON.stringify(products));
+            syncProductsToCloud(); // 自動同步最新扣減後的庫存至雲端
 
             let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             let total = subtotal + shippingObj.fee;
             let orderId = 'ORD-' + Date.now().toString().slice(-6);
-            currentCreatedOrderId = orderId; // 記錄下來給後續 LINE 綁定對應
+            currentCreatedOrderId = orderId;
 
             let newOrder = {
                 id: orderId, 
@@ -940,7 +974,6 @@
             orders.unshift(newOrder);
             localStorage.setItem('daigou_orders', JSON.stringify(orders));
 
-            // 送出給 GAS 後端寫入試算表
             if (settings.sheetsUrl) {
                 try {
                     await fetch(settings.sheetsUrl, { 
@@ -952,12 +985,10 @@
                 } catch(e) { console.log(e); }
             }
 
-            // 清空購物車與重置 UI
             cart = []; saveCart(); updateCartBadge(); closeCartModal();
             renderBuyerProducts();
             renderAdminOrders();
 
-            // 顯示訂單成功彈窗
             document.getElementById('success-order-id').innerText = orderId;
             document.getElementById('line-login-container').classList.remove('hidden');
             document.getElementById('line-user-info').classList.add('hidden');
@@ -1015,10 +1046,11 @@
             }
 
             localStorage.setItem('daigou_products', JSON.stringify(products));
+            syncProductsToCloud(); // 👈 儲存/上架時自動推送雲端商品總表
             resetProductForm();
             renderAdminProducts();
             renderBuyerProducts();
-            alert(editId ? '商品資料修改成功！' : '新商品已上架！');
+            alert(editId ? '商品資料修改成功並已同步至雲端！' : '新商品已上架並同步至雲端！');
         }
 
         function editProductByIndex(idx) {
@@ -1083,6 +1115,7 @@
             if (confirm(`確定要刪除商品「${products[idx].name}」嗎？`)) {
                 products.splice(idx, 1);
                 localStorage.setItem('daigou_products', JSON.stringify(products));
+                syncProductsToCloud(); // 👈 刪除商品後推送雲端
                 renderAdminProducts();
                 renderBuyerProducts();
             }
@@ -1174,7 +1207,8 @@
                             settingsJson: JSON.stringify(settings)
                         })
                     });
-                    alert('設定已儲存並成功同步至雲端！手機與電腦將同步使用最新設定。');
+                    await syncProductsToCloud();
+                    alert('設定與商品資料已成功同步至雲端！');
                 } catch(e) {
                     alert('已儲存至本機，但雲端同步失敗，請檢查 GAS 網址。');
                 }
