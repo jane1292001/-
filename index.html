@@ -482,6 +482,14 @@
         async function syncProductsToCloud() {
             if (settings.sheetsUrl) {
                 try {
+                    // 安全檢查：如果 products 是空的，不進行同步，避免覆蓋試算表
+                    if (!products || products.length === 0) {
+                        console.log("目前商品陣列為空，略過雲端同步，避免清空試算表");
+                        return;                        
+                    }
+
+                    console.log("正在發送商品同步至雲端，商品數量：", products.length);
+
                     await fetch(settings.sheetsUrl, {
                         method: 'POST',
                         mode: 'no-cors',
@@ -491,10 +499,12 @@
                             productsJson: JSON.stringify(products)
                         })
                     });
-                    console.log("商品已成功同步至雲端");
+                    console.log("商品同步請求已送出");
                 } catch(e) {
                     console.log("商品雲端同步失敗", e);
                 }
+            } else {
+                console.log("未設定 GAS 網址 (sheetsUrl)");
             }
         }
 
