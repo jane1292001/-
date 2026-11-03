@@ -286,7 +286,7 @@
         </div>
     </div>
 
-    <!-- ==================== 購物車彈窗 (單純填寫收件資訊) ==================== -->
+    <!-- ==================== 購物車彈窗 ==================== -->
     <div id="cart-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="p-5 border-b flex justify-between items-center bg-gray-50">
@@ -295,10 +295,8 @@
             </div>
             
             <div class="p-5 overflow-y-auto flex-grow space-y-4">
-                <!-- 購物車商品列表 -->
                 <div id="cart-items-container" class="divide-y divide-gray-100 space-y-3"></div>
 
-                <!-- 填寫收件人資訊 -->
                 <div class="space-y-3 pt-2 border-t">
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1">選擇取貨方式與運費 *</label>
@@ -310,7 +308,6 @@
                         <div><label class="block text-xs font-bold text-gray-600 mb-1">聯絡電話 *</label><input type="tel" id="buyer-phone" class="w-full px-3 py-2 bg-white border rounded-xl text-sm"></div>
                     </div>
                     
-                    <!-- 獨立超商門市選擇與官方地圖查詢按鈕 -->
                     <div id="store-selector-container" class="space-y-2 hidden bg-indigo-50/50 p-3.5 rounded-2xl border border-indigo-100">
                         <div class="flex justify-between items-center">
                             <label class="block text-xs font-bold text-indigo-900" id="store-label-title">取貨門市選擇 *</label>
@@ -322,7 +319,6 @@
                         <input type="text" id="buyer-store-input" placeholder="請至上方地圖查詢後，在此貼上「門市名稱與店號」" class="w-full px-3 py-2 bg-white border border-indigo-200 rounded-xl text-sm font-medium text-gray-800">
                     </div>
 
-                    <!-- 備註欄位 (非必填) -->
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1">其他備註事項 (選填)</label>
                         <input type="text" id="buyer-note" placeholder="例如: 盡快出貨、包裝留意等..." class="w-full px-3 py-2 bg-white border rounded-xl text-sm">
@@ -352,7 +348,6 @@
                 <p class="text-sm text-gray-500 mt-1">您的訂單編號：<span id="success-order-id" class="font-bold text-indigo-600"></span></p>
             </div>
 
-            <!-- 📦 LINE 一鍵綁定區塊 (下單後直接綁定此筆訂單) -->
             <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-left space-y-3">
                 <div id="line-login-container">
                     <p class="text-xs font-bold text-emerald-900 mb-1">即時接收商品進度與到貨通知：</p>
@@ -446,7 +441,7 @@
             updateCartBadge();
         });
 
-        // 🌐 從 Google 試算表 (GAS) 讀取雲端系統設定
+        // 🌐 從雲端讀取系統設定
         async function fetchCloudSettings() {
             if (settings.sheetsUrl) {
                 try {
@@ -457,7 +452,7 @@
                         localStorage.setItem('daigou_settings', JSON.stringify(settings));
                     }
                 } catch(e) {
-                    console.log("從雲端抓取設定失敗，使用本地備份設定", e);
+                    console.log("從雲端抓取設定失敗", e);
                 }
             }
         }
@@ -482,13 +477,7 @@
         async function syncProductsToCloud() {
             if (settings.sheetsUrl) {
                 try {
-                    // 安全檢查：如果 products 是空的，不進行同步，避免覆蓋試算表
-                    if (!products || products.length === 0) {
-                        console.log("目前商品陣列為空，略過雲端同步，避免清空試算表");
-                        return;                        
-                    }
-
-                    console.log("正在發送商品同步至雲端，商品數量：", products.length);
+                    if (!products || products.length === 0) return;
 
                     await fetch(settings.sheetsUrl, {
                         method: 'POST',
@@ -496,15 +485,13 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             action: 'saveProducts',
-                            productsJson: JSON.stringify(products)
+                            products: products
                         })
                     });
-                    console.log("商品同步請求已送出");
+                    console.log("商品已成功同步至雲端表格");
                 } catch(e) {
                     console.log("商品雲端同步失敗", e);
                 }
-            } else {
-                console.log("未設定 GAS 網址 (sheetsUrl)");
             }
         }
 
@@ -522,7 +509,6 @@
             }
         }
 
-        // ==================== 送出訂單後再綁定 LINE 帳號 ====================
         function loginWithLineAfterOrder() {
             if (!settings.sheetsUrl || settings.sheetsUrl.trim() === "") {
                 alert('賣家未設定 Google Sheets Web App URL，無法進行 LINE 綁定。');
@@ -610,7 +596,6 @@
             renderBuyerProducts();
         }
 
-        // ==================== 買家商品與購物車邏輯 ====================
         function handleMultipleImages(e) {
             const files = Array.from(e.target.files);
             if (files.length === 0) return;
@@ -947,7 +932,6 @@
                 return;
             }
 
-            // 檢查並扣減庫存
             for (let item of cart) {
                 let prod = products.find(p => String(p.id) === String(item.id));
                 if (prod && prod.stock !== undefined) {
@@ -959,7 +943,7 @@
                 }
             }
             localStorage.setItem('daigou_products', JSON.stringify(products));
-            syncProductsToCloud(); // 自動同步最新扣減後的庫存至雲端
+            syncProductsToCloud();
 
             let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             let total = subtotal + shippingObj.fee;
@@ -1009,7 +993,6 @@
             document.getElementById('order-success-modal').classList.add('hidden');
         }
 
-        // ==================== 賣家後台邏輯 ====================
         function switchAdminTab(tab) {
             ['products', 'orders', 'settings'].forEach(t => {
                 document.getElementById(`admin-tab-${t}`).classList.add('hidden');
@@ -1056,7 +1039,7 @@
             }
 
             localStorage.setItem('daigou_products', JSON.stringify(products));
-            syncProductsToCloud(); // 👈 儲存/上架時自動推送雲端商品總表
+            syncProductsToCloud();
             resetProductForm();
             renderAdminProducts();
             renderBuyerProducts();
@@ -1125,7 +1108,7 @@
             if (confirm(`確定要刪除商品「${products[idx].name}」嗎？`)) {
                 products.splice(idx, 1);
                 localStorage.setItem('daigou_products', JSON.stringify(products));
-                syncProductsToCloud(); // 👈 刪除商品後推送雲端
+                syncProductsToCloud();
                 renderAdminProducts();
                 renderBuyerProducts();
             }
