@@ -56,7 +56,7 @@
                 </div>
             </div>
 
-            <!-- 商品展示網格 -->
+            <!-- 商品展示網格 (已固定圖片比例) -->
             <div id="buyer-product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
         </div>
 
@@ -75,7 +75,7 @@
             <div id="admin-tab-products" class="space-y-6">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                     <h3 id="form-title" class="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                        <i class="fa-solid fa-circle-plus text-indigo-600 mr-2"></i>上架新商品 (手機拍照自動壓縮)
+                        <i class="fa-solid fa-circle-plus text-indigo-600 mr-2"></i>上架新商品 (手機照片自動壓縮防卡死)
                     </h3>
                     <form id="product-form" onsubmit="saveProduct(event)" class="space-y-4">
                         <input type="hidden" id="edit-product-id">
@@ -95,7 +95,6 @@
                             </div>
                         </div>
 
-                        <!-- 庫存與登記截止日欄位 -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-gray-600 mb-1">可訂購數量 (庫存限制) *</label>
@@ -107,14 +106,12 @@
                             </div>
                         </div>
 
-                        <!-- 多圖上傳區 (1~5張) -->
                         <div>
                             <label class="block text-xs font-bold text-gray-600 mb-1">選擇商品照片 (最多 5 張) *</label>
-                            <input type="file" id="p-image-files" accept="image/*" multiple onchange="handleMultipleImages(event)" class="block w-full text-xs text-gray-500 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border rounded-xl p-1">
+                            <input type="file" id="p-image-files" accept="image/*" multiple onchange="handleMultipleImages(event)" class="block w-full text-xs text-gray-500 border rounded-xl p-1 cursor-pointer">
                             <p class="text-[11px] text-gray-400 mt-1">目前已選 <span id="img-count-badge" class="font-bold text-indigo-600">0</span> 張照片</p>
                         </div>
 
-                        <!-- 預覽縮圖清單 -->
                         <div id="multi-img-preview-container" class="flex flex-wrap gap-3"></div>
 
                         <div>
@@ -155,15 +152,17 @@
                 </div>
             </div>
 
-            <!-- 分頁 2: 訂單管理 -->
+            <!-- 分頁 2: 訂單管理 (雲端同步) -->
             <div id="admin-tab-orders" class="hidden space-y-6">
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     <div class="p-4 border-b border-gray-100 flex justify-between items-center">
                         <h4 class="font-bold text-gray-800">買家訂單紀錄 (<span id="order-count">0</span>)</h4>
                         <div class="flex gap-2">
-                            <button onclick="fetchCloudOrders()" class="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1 cursor-pointer"><i class="fa-solid fa-rotate mr-1"></i>同步雲端訂單</button>
-                            <button onclick="exportOrdersCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1 shadow cursor-pointer"><i class="fa-solid fa-file-excel mr-1"></i>匯出 Excel</button>
-                            <button onclick="clearOrders()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer">清空訂單</button>
+                            <button onclick="fetchCloudOrders()" class="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1 cursor-pointer">
+                                <i class="fa-solid fa-rotate mr-1"></i>重新同步雲端訂單
+                            </button>
+                            <button onclick="exportOrdersCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer"><i class="fa-solid fa-file-excel mr-1"></i>匯出 Excel</button>
+                            <button onclick="clearOrders()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer">清空訂單</button>
                         </div>
                     </div>
                     <div class="overflow-x-auto">
@@ -185,7 +184,7 @@
                 </div>
             </div>
 
-            <!-- 分頁 3: 系統設定 -->
+            <!-- 分頁 3: 系統設定 (增加 LINE LOGIN 密鑰動態設定) -->
             <div id="admin-tab-settings" class="hidden space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
@@ -197,6 +196,10 @@
                         <div>
                             <label class="block text-xs font-bold text-gray-600 mb-1">修改後台登入密碼</label>
                             <input type="password" id="setting-admin-pwd" placeholder="留空則不修改 (預設 1234)" class="w-full px-3 py-2 border rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">LINE Login Channel Secret (防護隔天失效密鑰)</label>
+                            <input type="text" id="setting-login-secret" placeholder="貼上 LINE Login 的 Channel secret" class="w-full px-3 py-2 border rounded-xl text-sm font-mono text-xs">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-600 mb-1">官方 LINE 連結 (例如: https://line.me/...)</label>
@@ -226,7 +229,7 @@
         </div>
     </main>
 
-    <!-- 頁尾懸浮 / 聯絡官方 LINE 按鈕 -->
+    <!-- 頁尾懸浮 LINE 按鈕 -->
     <div id="line-float-container" class="fixed bottom-5 right-5 z-40 hidden">
         <a id="line-float-btn" href="#" target="_blank" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-4 py-3 rounded-full shadow-lg flex items-center space-x-2 transition cursor-pointer">
             <i class="fa-brands fa-line text-2xl"></i>
@@ -234,7 +237,7 @@
         </a>
     </div>
 
-    <!-- ==================== 密碼登入驗證彈窗 ==================== -->
+    <!-- 密碼登入彈窗 -->
     <div id="password-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 space-y-4">
             <div class="text-center">
@@ -250,7 +253,7 @@
         </div>
     </div>
 
-    <!-- ==================== 商品詳情檢視彈窗 ==================== -->
+    <!-- 商品詳情檢視彈窗 -->
     <div id="product-detail-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="p-4 border-b flex justify-between items-center bg-gray-50">
@@ -287,7 +290,7 @@
         </div>
     </div>
 
-    <!-- ==================== 購物車彈窗 (單純填寫收件資訊) ==================== -->
+    <!-- 購物車彈窗 -->
     <div id="cart-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="p-5 border-b flex justify-between items-center bg-gray-50">
@@ -338,7 +341,7 @@
         </div>
     </div>
 
-    <!-- ==================== 訂單成功與 LINE 綁定彈窗 ==================== -->
+    <!-- 訂單成功與 LINE 綁定彈窗 -->
     <div id="order-success-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 text-center space-y-5">
             <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mx-auto font-black shadow-inner">
@@ -370,7 +373,7 @@
         </div>
     </div>
 
-    <!-- ==================== 買家訂單查詢彈窗 ==================== -->
+    <!-- 買家訂單查詢彈窗 -->
     <div id="buyer-orders-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="p-5 border-b flex justify-between items-center bg-gray-50">
@@ -394,7 +397,7 @@
         </div>
     </div>
 
-    <!-- ==================== JavaScript 核心邏輯 ==================== -->
+    <!-- ==================== JavaScript 完整邏輯 ==================== -->
     <script>
         const LOGIN_CHANNEL_ID = '2012296940';
         let currentCreatedOrderId = null; 
@@ -402,6 +405,7 @@
         const DEFAULT_SETTINGS = {
             brand: "海外代購選物所",
             adminPwd: "1234",
+            loginChannelSecret: "bf9e16b319ea2a723f329911a1ba072",
             lineUrl: "",
             sheetsUrl: "https://script.google.com/macros/s/AKfycbzaqb6fP1nZ5dFEmPQHHAQm5rt4AZlS5R_aV8uewSB7SzqONU0oHRZxpM58Aw5TTpAo/exec", 
             bankInfo: "中國信託 (822) 帳號：1234-5678-9012 (戶名: 代購選物)",
@@ -413,13 +417,8 @@
             ]
         };
 
-        const DEFAULT_PRODUCTS = [
-            { id: "p_1001", name: "日本東京限定抹茶夾心餅乾", country: "日本代購 🇯🇵", price: 380, stock: 20, deadline: "", images: ["https://images.unsplash.com/photo-1558961363-fa8fdf82db35"], desc: "濃郁抹茶夾心，伴手禮首選盒裝。" },
-            { id: "p_1002", name: "韓國熱銷純淨保濕水光面膜 (10入)", country: "韓國代購 🇰🇷", price: 450, stock: 15, deadline: "2026-12-31", images: ["https://images.unsplash.com/photo-1522337360788-8b13dee7a37e"], desc: "深層保濕補水，韓國Olive Young熱銷。" }
-        ];
-
         let settings = JSON.parse(localStorage.getItem('daigou_settings')) || DEFAULT_SETTINGS;
-        let products = JSON.parse(localStorage.getItem('daigou_products')) || DEFAULT_PRODUCTS;
+        let products = JSON.parse(localStorage.getItem('daigou_products')) || [];
         let orders = JSON.parse(localStorage.getItem('daigou_orders')) || [];
         let cart = JSON.parse(localStorage.getItem('daigou_cart')) || [];
         
@@ -429,15 +428,14 @@
         let viewingProductIndex = null;
 
         window.addEventListener('DOMContentLoaded', async () => {
-            localStorage.setItem('daigou_admin_logged', 'false');
-            
-            // 偵測是否剛完成 LINE 綁定重定向回來
+            // 偵測是否剛完成 LINE 授權跳頁
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('lineBind') === 'success') {
-                alert('LINE 帳號已成功綁定此筆訂單！');
+                alert('LINE 帳號已成功對應綁定您的訂單！');
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
 
+            localStorage.setItem('daigou_admin_logged', 'false');
             await fetchCloudSettings();
             await fetchCloudProducts();
             await fetchCloudOrders();
@@ -451,7 +449,7 @@
             updateCartBadge();
         });
 
-        // 🌐 從 Google 試算表 (GAS) 讀取雲端系統設定
+        // 🌐 從雲端讀取系統設定
         async function fetchCloudSettings() {
             if (settings.sheetsUrl) {
                 try {
@@ -483,7 +481,7 @@
             }
         }
 
-        // 🌐 從雲端讀取訂單列表（讓後台自動呈現）
+        // 🌐 從雲端讀取所有訂單紀錄
         async function fetchCloudOrders() {
             if (settings.sheetsUrl) {
                 try {
@@ -502,10 +500,8 @@
 
         // ☁️ 將商品總表同步推送到雲端
         async function syncProductsToCloud() {
-            if (settings.sheetsUrl) {
+            if (settings.sheetsUrl && products.length > 0) {
                 try {
-                    if (!products || products.length === 0) return;
-
                     await fetch(settings.sheetsUrl, {
                         method: 'POST',
                         mode: 'no-cors',
@@ -546,7 +542,7 @@
                 orderId: currentCreatedOrderId
             };
             const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${LOGIN_CHANNEL_ID}&redirect_uri=${encodeURIComponent(settings.sheetsUrl)}&state=${encodeURIComponent(JSON.stringify(stateData))}&scope=profile%20openid`;
-            window.location.href = lineAuthUrl;
+            window.location.href = lineAuthUrl; // 直接全頁跳轉更穩定
         }
 
         function handleAdminToggle() {
@@ -589,7 +585,6 @@
             document.getElementById('mode-text').innerText = '返回買家前台';
             document.getElementById('mode-icon').className = 'fa-solid fa-store';
             switchAdminTab('products');
-            fetchCloudOrders();
         }
 
         function switchToBuyerView() {
@@ -604,7 +599,7 @@
             renderBuyerProducts();
         }
 
-        // 🖼️ 處理圖片上傳並進行自動縮圖與 JPEG 壓縮
+        // 🖼️ 處理多圖上傳並進行 Canvas 壓縮
         function handleMultipleImages(e) {
             const files = Array.from(e.target.files);
             if (files.length === 0) return;
@@ -621,7 +616,7 @@
                         const canvas = document.createElement('canvas');
                         let width = img.width;
                         let height = img.height;
-                        const maxSize = 800; // 限制最大寬高 800px
+                        const maxSize = 800; // 限制最大尺寸為 800px
 
                         if (width > height && width > maxSize) {
                             height *= maxSize / width;
@@ -636,7 +631,8 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7); // 70% 壓縮品質
+                        // 壓縮為 JPEG，品質 70%
+                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
                         currentUploadedImages.push(compressedDataUrl);
                         renderImagePreviews();
                     };
@@ -721,7 +717,6 @@
 
                 html += `
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col group hover:shadow-md transition cursor-pointer" onclick="openProductDetailByIndex(${realIndex})">
-                        <!-- 固定為正方形 proportions，防止圖片過大 -->
                         <div class="relative aspect-square overflow-hidden bg-gray-100">
                             <img src="${mainImg}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
                             <span class="absolute top-3 left-3 bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold px-2.5 py-1 rounded-full">${p.country}</span>
@@ -892,10 +887,10 @@
                         <img src="${item.image}" class="w-12 h-12 object-cover rounded-xl border">
                         <div class="flex-grow"><h5 class="font-bold text-xs text-gray-800 line-clamp-1">${item.name}</h5><p class="text-xs text-indigo-600 font-bold">NT$ ${item.price.toLocaleString()}</p></div>
                         <div class="flex items-center space-x-2">
-                            <button onclick="changeQty(${index}, -1)" class="w-6 h-6 rounded-lg bg-gray-100 font-bold text-xs cursor-pointer">-</button>
+                            <button onclick="changeQty(${index}, -1)" class="w-6 h-6 rounded-lg bg-gray-100 font-bold text-xs">-</button>
                             <span class="text-xs font-bold w-5 text-center">${item.qty}</span>
-                            <button onclick="changeQty(${index}, 1)" class="w-6 h-6 rounded-lg bg-gray-100 font-bold text-xs cursor-pointer">+</button>
-                            <button onclick="removeItem(${index})" class="text-gray-400 hover:text-rose-500 ml-1 cursor-pointer"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                            <button onclick="changeQty(${index}, 1)" class="w-6 h-6 rounded-lg bg-gray-100 font-bold text-xs">+</button>
+                            <button onclick="removeItem(${index})" class="text-gray-400 hover:text-rose-500 ml-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
                         </div>
                     </div>
                 `;
@@ -1105,7 +1100,7 @@
             document.getElementById('edit-product-id').value = '';
             currentUploadedImages = [];
             renderImagePreviews();
-            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-circle-plus text-indigo-600 mr-2"></i>上架新商品 (手機拍照自動壓縮)`;
+            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-circle-plus text-indigo-600 mr-2"></i>上架新商品 (建議上傳 1MB 以下照片)`;
             document.getElementById('cancel-edit-btn').classList.add('hidden');
         }
 
@@ -1202,6 +1197,7 @@
 
         function renderSettingsPanel() {
             document.getElementById('setting-brand').value = settings.brand;
+            document.getElementById('setting-login-secret').value = settings.loginChannelSecret || '';
             document.getElementById('setting-line-url').value = settings.lineUrl || '';
             document.getElementById('setting-sheets-url').value = settings.sheetsUrl || '';
             document.getElementById('setting-bank-info').value = settings.bankInfo || '';
@@ -1215,6 +1211,7 @@
 
         async function saveBasicSettings() {
             settings.brand = document.getElementById('setting-brand').value.trim() || "海外代購選物所";
+            settings.loginChannelSecret = document.getElementById('setting-login-secret').value.trim();
             settings.lineUrl = document.getElementById('setting-line-url').value.trim();
             settings.sheetsUrl = document.getElementById('setting-sheets-url').value.trim();
             settings.bankInfo = document.getElementById('setting-bank-info').value.trim();
