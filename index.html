@@ -56,7 +56,7 @@
                 </div>
             </div>
 
-            <!-- 商品展示網格 -->
+            <!-- 商品展示網格 (已固定圖片比例) -->
             <div id="buyer-product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
         </div>
 
@@ -75,7 +75,7 @@
             <div id="admin-tab-products" class="space-y-6">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                     <h3 id="form-title" class="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                        <i class="fa-solid fa-circle-plus text-indigo-600 mr-2"></i>上架新商品 (手機照片自動壓縮)
+                        <i class="fa-solid fa-circle-plus text-indigo-600 mr-2"></i>上架新商品 (手機照片自動壓縮防卡死)
                     </h3>
                     <form id="product-form" onsubmit="saveProduct(event)" class="space-y-4">
                         <input type="hidden" id="edit-product-id">
@@ -101,7 +101,7 @@
                                 <input type="number" id="p-stock" required min="0" value="10" placeholder="例如: 10" class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 text-sm">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-600 mb-1">登記截止日期 (選填)</label>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">登記截止日期 (選填，過期停止下單)</label>
                                 <input type="date" id="p-deadline" class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 text-sm bg-white">
                             </div>
                         </div>
@@ -184,7 +184,7 @@
                 </div>
             </div>
 
-            <!-- 分頁 3: 系統設定 -->
+            <!-- 分頁 3: 系統設定 (增加 LINE LOGIN 密鑰動態設定) -->
             <div id="admin-tab-settings" class="hidden space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
@@ -198,8 +198,8 @@
                             <input type="password" id="setting-admin-pwd" placeholder="留空則不修改 (預設 1234)" class="w-full px-3 py-2 border rounded-xl text-sm">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-600 mb-1">LINE Login Channel ID</label>
-                            <input type="text" id="setting-login-channel-id" placeholder="貼上 LINE Login 的 Channel ID" class="w-full px-3 py-2 border rounded-xl text-sm font-mono text-xs">
+                            <label class="block text-xs font-bold text-gray-600 mb-1">LINE Login Channel Secret (防護隔天失效密鑰)</label>
+                            <input type="text" id="setting-login-secret" placeholder="貼上 LINE Login 的 Channel secret" class="w-full px-3 py-2 border rounded-xl text-sm font-mono text-xs">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-600 mb-1">官方 LINE 連結 (例如: https://line.me/...)</label>
@@ -341,7 +341,7 @@
         </div>
     </div>
 
-    <!-- 訂單成功與 LINE 綁定彈窗 (修正 ID 容器結構) -->
+    <!-- 訂單成功與 LINE 綁定彈窗 -->
     <div id="order-success-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 text-center space-y-5">
             <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mx-auto font-black shadow-inner">
@@ -397,14 +397,15 @@
         </div>
     </div>
 
-    <!-- JavaScript 完整邏輯 -->
+    <!-- ==================== JavaScript 完整邏輯 ==================== -->
     <script>
+        const LOGIN_CHANNEL_ID = '2012296940';
         let currentCreatedOrderId = null; 
 
         const DEFAULT_SETTINGS = {
             brand: "海外代購選物所",
             adminPwd: "1234",
-            loginChannelId: "2012296940",
+            loginChannelSecret: "bf9e16b319ea2a723f329911a1ba072",
             lineUrl: "",
             sheetsUrl: "https://script.google.com/macros/s/AKfycbzaqb6fP1nZ5dFEmPQHHAQm5rt4AZlS5R_aV8uewSB7SzqONU0oHRZxpM58Aw5TTpAo/exec", 
             bankInfo: "中國信託 (822) 帳號：1234-5678-9012 (戶名: 代購選物)",
@@ -427,6 +428,7 @@
         let viewingProductIndex = null;
 
         window.addEventListener('DOMContentLoaded', async () => {
+            // 偵測是否剛完成 LINE 授權跳頁
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('lineBind') === 'success') {
                 alert('LINE 帳號已成功對應綁定您的訂單！');
@@ -447,7 +449,7 @@
             updateCartBadge();
         });
 
-        // 從雲端讀取系統設定
+        // 🌐 從雲端讀取系統設定
         async function fetchCloudSettings() {
             if (settings.sheetsUrl) {
                 try {
@@ -463,7 +465,7 @@
             }
         }
 
-        // 從雲端讀取商品總表
+        // 🌐 從雲端讀取商品總表
         async function fetchCloudProducts() {
             if (settings.sheetsUrl) {
                 try {
@@ -479,7 +481,7 @@
             }
         }
 
-        // 從雲端讀取所有訂單紀錄
+        // 🌐 從雲端讀取所有訂單紀錄
         async function fetchCloudOrders() {
             if (settings.sheetsUrl) {
                 try {
@@ -496,7 +498,7 @@
             }
         }
 
-        // 將商品總表同步推送到雲端
+        // ☁️ 將商品總表同步推送到雲端
         async function syncProductsToCloud() {
             if (settings.sheetsUrl && products.length > 0) {
                 try {
@@ -535,13 +537,12 @@
                 alert('賣家未設定 Google Sheets Web App URL，無法進行 LINE 綁定。');
                 return;
             }
-            let channelId = settings.loginChannelId || '2012296940';
             const stateData = {
-                url: window.location.origin + window.location.pathname,
+                url: window.location.href,
                 orderId: currentCreatedOrderId
             };
-            const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${channelId}&redirect_uri=${encodeURIComponent(settings.sheetsUrl)}&state=${encodeURIComponent(JSON.stringify(stateData))}&scope=profile%20openid`;
-            window.location.href = lineAuthUrl;
+            const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${LOGIN_CHANNEL_ID}&redirect_uri=${encodeURIComponent(settings.sheetsUrl)}&state=${encodeURIComponent(JSON.stringify(stateData))}&scope=profile%20openid`;
+            window.location.href = lineAuthUrl; // 直接全頁跳轉更穩定
         }
 
         function handleAdminToggle() {
@@ -598,7 +599,7 @@
             renderBuyerProducts();
         }
 
-        // 多圖上傳與 Canvas 壓縮
+        // 🖼️ 處理多圖上傳並進行 Canvas 壓縮
         function handleMultipleImages(e) {
             const files = Array.from(e.target.files);
             if (files.length === 0) return;
@@ -615,7 +616,7 @@
                         const canvas = document.createElement('canvas');
                         let width = img.width;
                         let height = img.height;
-                        const maxSize = 800;
+                        const maxSize = 800; // 限制最大尺寸為 800px
 
                         if (width > height && width > maxSize) {
                             height *= maxSize / width;
@@ -630,6 +631,7 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
 
+                        // 壓縮為 JPEG，品質 70%
                         const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
                         currentUploadedImages.push(compressedDataUrl);
                         renderImagePreviews();
@@ -686,9 +688,8 @@
             const today = new Date().toISOString().split('T')[0];
             
             let filtered = products.filter(p => {
-                if (!p || typeof p.name !== 'string') return false;
                 let matchCat = (currentCategory === '全部' || p.country === currentCategory);
-                let matchKey = p.name.toLowerCase().includes(keyword) || (p.desc && String(p.desc).toLowerCase().includes(keyword));
+                let matchKey = p.name.toLowerCase().includes(keyword) || (p.desc && p.desc.toLowerCase().includes(keyword));
                 return matchCat && matchKey;
             });
 
@@ -732,7 +733,7 @@
                                     <span>${p.deadline ? '截止: ' + p.deadline : ''}</span>
                                 </div>
                                 <div class="flex items-center justify-between pt-2 border-t border-gray-100">
-                                    <span class="text-base font-black text-indigo-600">NT$ ${Number(p.price || 0).toLocaleString()}</span>
+                                    <span class="text-base font-black text-indigo-600">NT$ ${p.price.toLocaleString()}</span>
                                     <button type="button" onclick="event.stopPropagation(); addToCartByIndex(${realIndex}, 1)" ${canBuy ? '' : 'disabled'} class="${canBuy ? 'bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white cursor-pointer' : 'bg-gray-100 text-gray-400 cursor-not-allowed'} px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1">
                                         <i class="fa-solid ${isExpired ? 'fa-calendar-xmark' : (isSoldOut ? 'fa-ban' : 'fa-cart-plus')}"></i>
                                         <span>${isExpired ? '已截止' : (isSoldOut ? '售完' : '加購')}</span>
@@ -760,7 +761,7 @@
             document.getElementById('modal-p-name').innerText = p.name;
             document.getElementById('modal-p-title').innerText = p.name;
             document.getElementById('modal-p-country').innerText = p.country;
-            document.getElementById('modal-p-price').innerText = `NT$ ${Number(p.price || 0).toLocaleString()}`;
+            document.getElementById('modal-p-price').innerText = `NT$ ${p.price.toLocaleString()}`;
             document.getElementById('modal-p-desc').innerText = p.desc || '暫無詳細描述';
             document.getElementById('modal-qty-input').value = 1;
 
@@ -884,7 +885,7 @@
                 html += `
                     <div class="flex items-center justify-between gap-3 py-2">
                         <img src="${item.image}" class="w-12 h-12 object-cover rounded-xl border">
-                        <div class="flex-grow"><h5 class="font-bold text-xs text-gray-800 line-clamp-1">${item.name}</h5><p class="text-xs text-indigo-600 font-bold">NT$ ${Number(item.price || 0).toLocaleString()}</p></div>
+                        <div class="flex-grow"><h5 class="font-bold text-xs text-gray-800 line-clamp-1">${item.name}</h5><p class="text-xs text-indigo-600 font-bold">NT$ ${item.price.toLocaleString()}</p></div>
                         <div class="flex items-center space-x-2">
                             <button onclick="changeQty(${index}, -1)" class="w-6 h-6 rounded-lg bg-gray-100 font-bold text-xs">-</button>
                             <span class="text-xs font-bold w-5 text-center">${item.qty}</span>
@@ -1099,7 +1100,7 @@
             document.getElementById('edit-product-id').value = '';
             currentUploadedImages = [];
             renderImagePreviews();
-            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-circle-plus text-indigo-600 mr-2"></i>上架新商品 (手機照片自動壓縮)`;
+            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-circle-plus text-indigo-600 mr-2"></i>上架新商品 (建議上傳 1MB 以下照片)`;
             document.getElementById('cancel-edit-btn').classList.add('hidden');
         }
 
@@ -1120,7 +1121,7 @@
                         <td class="p-3"><img src="${mainImg}" class="w-10 h-10 object-cover rounded-lg border"></td>
                         <td class="p-3 font-bold text-gray-800">${p.name}</td>
                         <td class="p-3"><span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs font-bold">${p.country}</span></td>
-                        <td class="p-3 font-bold text-indigo-600">NT$ ${Number(p.price || 0).toLocaleString()}</td>
+                        <td class="p-3 font-bold text-indigo-600">NT$ ${p.price.toLocaleString()}</td>
                         <td class="p-3 font-bold ${stockNum <= 0 ? 'text-rose-600' : 'text-gray-700'}">${stockNum}</td>
                         <td class="p-3 text-xs text-gray-500">${deadlineStr}</td>
                         <td class="p-3 text-right space-x-2">
@@ -1146,17 +1147,11 @@
         function renderAdminOrders() {
             const tbody = document.getElementById('admin-order-table');
             document.getElementById('order-count').innerText = orders.length;
-            if (!orders || orders.length === 0) { tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">尚無訂單</td></tr>`; return; }
+            if (orders.length === 0) { tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">尚無訂單</td></tr>`; return; }
             
             let html = '';
             orders.forEach((o, index) => {
-                let itemsList = '';
-                if (Array.isArray(o.rawItems)) {
-                    itemsList = o.rawItems.map(i => `${i.name} x${i.qty}`).join('<br>');
-                } else if (typeof o.rawItems === 'string') {
-                    itemsList = o.rawItems;
-                }
-                
+                let detailsStr = o.rawItems ? o.rawItems.map(i => `${i.name} x${i.qty}`).join('<br>') : '';
                 let lineStatus = o.lineUserId ? `<span class="text-emerald-600 font-bold">🟢 ${o.lineDisplayName || '已綁定'}</span>` : `<span class="text-gray-400">未綁定</span>`;
 
                 html += `
@@ -1164,8 +1159,8 @@
                         <td class="p-3"><span class="font-bold text-indigo-600">${o.id}</span><div class="text-xs text-gray-400">${o.date}</div></td>
                         <td class="p-3"><div class="font-bold text-gray-800">${o.name}</div><div class="text-xs text-gray-500">${o.phone}</div></td>
                         <td class="p-3 text-xs text-gray-600">${o.shippingName || ''}<br><span class="font-bold text-indigo-700">${o.storeInfo}</span><br>LINE: ${lineStatus}</td>
-                        <td class="p-3 text-xs text-gray-700">${itemsList}</td>
-                        <td class="p-3 font-bold text-indigo-600">NT$ ${Number(o.total || 0).toLocaleString()}</td>
+                        <td class="p-3 text-xs text-gray-700">${detailsStr}</td>
+                        <td class="p-3 font-bold text-indigo-600">NT$ ${o.total.toLocaleString()}</td>
                         <td class="p-3">
                             <select onchange="updateOrderStatusFromAdmin(${index}, this.value)" class="text-xs px-2 py-1 rounded-lg font-bold bg-amber-100 text-amber-800 border-0 cursor-pointer">
                                 <option value="待處理" ${o.status==='待處理'?'selected':''}>待處理</option>
@@ -1186,7 +1181,7 @@
             localStorage.setItem('daigou_orders', JSON.stringify(orders));
             let targetOrder = orders[index];
 
-            if (settings.sheetsUrl) {
+            if (settings.sheetsUrl && (newStatus === '已到貨' || newStatus === '運送中')) {
                 try {
                     await fetch(settings.sheetsUrl, {
                         method: 'POST',
@@ -1194,15 +1189,15 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ action: 'updateOrderStatus', orderId: targetOrder.id, newStatus: newStatus })
                     });
-                    alert(`狀態已更新為【${newStatus}】，並已傳送更新請求給 GAS 後端觸發 LINE 訊息推播！`);
-                } catch(e) { alert('狀態已更新，但連線 GAS 後端失敗。'); }
+                    alert(`狀態已更新為【${newStatus}】，並已觸發 LINE 到貨通知給買家！`);
+                } catch(e) { alert('狀態已更新，但 LINE 通知觸發失敗。'); }
             } else { alert('訂單狀態已更新！'); }
             renderAdminOrders();
         }
 
         function renderSettingsPanel() {
             document.getElementById('setting-brand').value = settings.brand;
-            document.getElementById('setting-login-channel-id').value = settings.loginChannelId || '2012296940';
+            document.getElementById('setting-login-secret').value = settings.loginChannelSecret || '';
             document.getElementById('setting-line-url').value = settings.lineUrl || '';
             document.getElementById('setting-sheets-url').value = settings.sheetsUrl || '';
             document.getElementById('setting-bank-info').value = settings.bankInfo || '';
@@ -1216,7 +1211,7 @@
 
         async function saveBasicSettings() {
             settings.brand = document.getElementById('setting-brand').value.trim() || "海外代購選物所";
-            settings.loginChannelId = document.getElementById('setting-login-channel-id').value.trim();
+            settings.loginChannelSecret = document.getElementById('setting-login-secret').value.trim();
             settings.lineUrl = document.getElementById('setting-line-url').value.trim();
             settings.sheetsUrl = document.getElementById('setting-sheets-url').value.trim();
             settings.bankInfo = document.getElementById('setting-bank-info').value.trim();
@@ -1277,13 +1272,7 @@
 
             let html = '';
             matched.forEach((o) => {
-                let itemsList = '';
-                if (Array.isArray(o.rawItems)) {
-                    itemsList = o.rawItems.map(i => `${i.name} x${i.qty}`).join('<br>');
-                } else if (typeof o.rawItems === 'string') {
-                    itemsList = o.rawItems;
-                }
-
+                let itemsList = o.rawItems ? o.rawItems.map(i => `${i.name} x${i.qty}`).join('<br>') : '';
                 html += `
                     <div class="bg-gray-50 border rounded-2xl p-4 space-y-2 text-xs">
                         <div class="flex justify-between font-bold border-b pb-2">
@@ -1292,7 +1281,7 @@
                         </div>
                         <p><strong>取貨門市：</strong>${o.storeInfo}</p>
                         <p><strong>商品明細：</strong><br>${itemsList}</p>
-                        <p class="font-black text-sm text-right text-gray-900 pt-1">總金額：NT$ ${Number(o.total || 0).toLocaleString()}</p>
+                        <p class="font-black text-sm text-right text-gray-900 pt-1">總金額：NT$ ${o.total.toLocaleString()}</p>
                     </div>
                 `;
             });
@@ -1303,12 +1292,7 @@
             if (orders.length === 0) { alert('目前沒有訂單可匯出！'); return; }
             let csvContent = "\uFEFF訂單編號,下單時間,買家姓名,電話,取貨方式/門市,商品明細,總金額,訂單狀態\n";
             orders.forEach(o => {
-                let details = '';
-                if (Array.isArray(o.rawItems)) {
-                    details = o.rawItems.map(i => `${i.name}*${i.qty}`).join(';');
-                } else if (typeof o.rawItems === 'string') {
-                    details = o.rawItems;
-                }
+                let details = o.rawItems ? o.rawItems.map(i => `${i.name}*${i.qty}`).join(';') : '';
                 csvContent += `"${o.id}","${o.date}","${o.name}","${o.phone}","${o.shippingName || ''} ${o.storeInfo}","${details}","${o.total}","${o.status}"\n`;
             });
             let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
