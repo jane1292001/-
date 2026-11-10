@@ -683,69 +683,75 @@
         }
 
         function renderBuyerProducts() {
-            const grid = document.getElementById('buyer-product-grid');
-            const keyword = document.getElementById('search-input').value.toLowerCase();
-            const today = new Date().toISOString().split('T')[0];
-            
-            let filtered = products.filter(p => {
-                let matchCat = (currentCategory === '全部' || p.country === currentCategory);
-                let matchKey = p.name.toLowerCase().includes(keyword) || (p.desc && p.desc.toLowerCase().includes(keyword));
-                return matchCat && matchKey;
-            });
+    const grid = document.getElementById('buyer-product-grid');
+    const keyword = String(document.getElementById('search-input').value || '').toLowerCase();
+    const today = new Date().toISOString().split('T')[0];
+    
+    // 🛡️ 根本防呆：強制將所有欄位轉為字串與陣列檢查，絕對不允許因型別錯誤崩潰
+    let filtered = products.filter(p => {
+        if (!p) return false;
+        let nameStr = String(p.name || '').toLowerCase();
+        let descStr = String(p.desc || '').toLowerCase();
+        let countryStr = String(p.country || '');
+        
+        let matchCat = (currentCategory === '全部' || countryStr === currentCategory);
+        let matchKey = nameStr.includes(keyword) || descStr.includes(keyword);
+        return matchCat && matchKey;
+    });
 
-            if (filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full py-12 text-center text-gray-400"><i class="fa-solid fa-box-open text-4xl mb-2"></i><p>沒有找到相關代購商品</p></div>`;
-                return;
-            }
+    if (filtered.length === 0) {
+        grid.innerHTML = `<div class="col-span-full py-12 text-center text-gray-400"><i class="fa-solid fa-box-open text-4xl mb-2"></i><p>沒有找到相關代購商品</p></div>`;
+        return;
+    }
 
-            let html = '';
-            filtered.forEach((p) => {
-                let realIndex = products.findIndex(item => String(item.id) === String(p.id));
-                let mainImg = (p.images && p.images.length > 0) ? p.images[0] : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff';
-                
-                let stockNum = p.stock !== undefined ? parseInt(p.stock) : 99;
-                let isExpired = p.deadline && p.deadline < today;
-                let isSoldOut = stockNum <= 0;
-                let canBuy = !isExpired && !isSoldOut;
+    let html = '';
+    filtered.forEach((p) => {
+        let realIndex = products.findIndex(item => item && String(item.id) === String(p.id));
+        let mainImg = (Array.isArray(p.images) && p.images.length > 0) ? p.images[0] : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff';
+        
+        let stockNum = p.stock !== undefined ? parseInt(p.stock) : 99;
+        let isExpired = p.deadline && p.deadline < today;
+        let isSoldOut = stockNum <= 0;
+        let canBuy = !isExpired && !isSoldOut;
 
-                let statusBadge = '';
-                if (isExpired) {
-                    statusBadge = `<span class="absolute top-3 right-3 bg-rose-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-xs">已截止登記</span>`;
-                } else if (isSoldOut) {
-                    statusBadge = `<span class="absolute top-3 right-3 bg-gray-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-xs">已售完</span>`;
-                }
+        let statusBadge = '';
+        if (isExpired) {
+            statusBadge = `<span class="absolute top-3 right-3 bg-rose-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-xs">已截止登記</span>`;
+        } else if (isSoldOut) {
+            statusBadge = `<span class="absolute top-3 right-3 bg-gray-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-xs">已售完</span>`;
+        }
 
-                html += `
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col group hover:shadow-md transition cursor-pointer" onclick="openProductDetailByIndex(${realIndex})">
-                        <div class="relative aspect-square overflow-hidden bg-gray-100">
-                            <img src="${mainImg}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-                            <span class="absolute top-3 left-3 bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold px-2.5 py-1 rounded-full">${p.country}</span>
-                            ${statusBadge}
+        html += `
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col group hover:shadow-md transition cursor-pointer" onclick="openProductDetailByIndex(${realIndex})">
+                <div class="relative aspect-square overflow-hidden bg-gray-100">
+                    <img src="${mainImg}" alt="${p.name || ''}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    <span class="absolute top-3 left-3 bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold px-2.5 py-1 rounded-full">${p.country || ''}</span>
+                    ${statusBadge}
+                </div>
+                <div class="p-4 flex flex-col flex-grow justify-between">
+                    <div>
+                        <h4 class="font-bold text-gray-900 text-sm line-clamp-1 mb-1">${p.name || '未命名商品'}</h4>
+                        <p class="text-xs text-gray-500 line-clamp-2 mb-2">${p.desc || '無詳細說明'}</p>
+                    </div>
+                    <div>
+                        <div class="text-[11px] text-gray-400 flex justify-between mb-2 font-medium">
+                            <span>剩餘庫存: ${stockNum}</span>
+                            <span>${p.deadline ? '截止: ' + p.deadline : ''}</span>
                         </div>
-                        <div class="p-4 flex flex-col flex-grow justify-between">
-                            <div>
-                                <h4 class="font-bold text-gray-900 text-sm line-clamp-1 mb-1">${p.name}</h4>
-                                <p class="text-xs text-gray-500 line-clamp-2 mb-2">${p.desc || '無詳細說明'}</p>
-                            </div>
-                            <div>
-                                <div class="text-[11px] text-gray-400 flex justify-between mb-2 font-medium">
-                                    <span>剩餘庫存: ${stockNum}</span>
-                                    <span>${p.deadline ? '截止: ' + p.deadline : ''}</span>
-                                </div>
-                                <div class="flex items-center justify-between pt-2 border-t border-gray-100">
-                                    <span class="text-base font-black text-indigo-600">NT$ ${p.price.toLocaleString()}</span>
-                                    <button type="button" onclick="event.stopPropagation(); addToCartByIndex(${realIndex}, 1)" ${canBuy ? '' : 'disabled'} class="${canBuy ? 'bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white cursor-pointer' : 'bg-gray-100 text-gray-400 cursor-not-allowed'} px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1">
-                                        <i class="fa-solid ${isExpired ? 'fa-calendar-xmark' : (isSoldOut ? 'fa-ban' : 'fa-cart-plus')}"></i>
-                                        <span>${isExpired ? '已截止' : (isSoldOut ? '售完' : '加購')}</span>
-                                    </button>
-                                </div>
-                            </div>
+                        <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                            <span class="text-base font-black text-indigo-600">NT$ ${Number(p.price || 0).toLocaleString()}</span>
+                            <button type="button" onclick="event.stopPropagation(); addToCartByIndex(${realIndex}, 1)" ${canBuy ? '' : 'disabled'} class="${canBuy ? 'bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white cursor-pointer' : 'bg-gray-100 text-gray-400 cursor-not-allowed'} px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1">
+                                <i class="fa-solid ${isExpired ? 'fa-calendar-xmark' : (isSoldOut ? 'fa-ban' : 'fa-cart-plus')}"></i>
+                                <span>${isExpired ? '已截止' : (isSoldOut ? '售完' : '加購')}</span>
+                            </button>
                         </div>
                     </div>
-                `;
-            });
-            grid.innerHTML = html;
-        }
+                </div>
+            </div>
+        `;
+    });
+    grid.innerHTML = html;
+}
 
         function openProductDetailByIndex(index) {
             let p = products[index];
@@ -1144,37 +1150,44 @@
             }
         }
 
-        function renderAdminOrders() {
-            const tbody = document.getElementById('admin-order-table');
-            document.getElementById('order-count').innerText = orders.length;
-            if (orders.length === 0) { tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">尚無訂單</td></tr>`; return; }
-            
-            let html = '';
-            orders.forEach((o, index) => {
-                let detailsStr = o.rawItems ? o.rawItems.map(i => `${i.name} x${i.qty}`).join('<br>') : '';
-                let lineStatus = o.lineUserId ? `<span class="text-emerald-600 font-bold">🟢 ${o.lineDisplayName || '已綁定'}</span>` : `<span class="text-gray-400">未綁定</span>`;
-
-                html += `
-                    <tr class="hover:bg-gray-50">
-                        <td class="p-3"><span class="font-bold text-indigo-600">${o.id}</span><div class="text-xs text-gray-400">${o.date}</div></td>
-                        <td class="p-3"><div class="font-bold text-gray-800">${o.name}</div><div class="text-xs text-gray-500">${o.phone}</div></td>
-                        <td class="p-3 text-xs text-gray-600">${o.shippingName || ''}<br><span class="font-bold text-indigo-700">${o.storeInfo}</span><br>LINE: ${lineStatus}</td>
-                        <td class="p-3 text-xs text-gray-700">${detailsStr}</td>
-                        <td class="p-3 font-bold text-indigo-600">NT$ ${o.total.toLocaleString()}</td>
-                        <td class="p-3">
-                            <select onchange="updateOrderStatusFromAdmin(${index}, this.value)" class="text-xs px-2 py-1 rounded-lg font-bold bg-amber-100 text-amber-800 border-0 cursor-pointer">
-                                <option value="待處理" ${o.status==='待處理'?'selected':''}>待處理</option>
-                                <option value="運送中" ${o.status==='運送中'?'selected':''}>運送中</option>
-                                <option value="已到貨" ${o.status==='已到貨'?'selected':''}>已到貨</option>
-                                <option value="已完成" ${o.status==='已完成'?'selected':''}>已完成</option>
-                            </select>
-                        </td>
-                        <td class="p-3 text-right"><button onclick="orders.splice(${index},1); localStorage.setItem('daigou_orders', JSON.stringify(orders)); renderAdminOrders();" class="text-rose-500 text-xs cursor-pointer"><i class="fa-solid fa-trash"></i></button></td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
+function renderAdminOrders() {
+    const tbody = document.getElementById('admin-order-table');
+    document.getElementById('order-count').innerText = orders.length;
+    if (!orders || orders.length === 0) { tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">尚無訂單</td></tr>`; return; }
+    
+    let html = '';
+    orders.forEach((o, index) => {
+        // 🛡️ 根本防呆：確保 rawItems 不論是陣列、字串還是空值都能安全顯示
+        let itemsList = '';
+        if (Array.isArray(o.rawItems)) {
+            itemsList = o.rawItems.map(i => `${i.name || '商品'} x${i.qty || 1}`).join('<br>');
+        } else {
+            itemsList = String(o.rawItems || '無明細');
         }
+        
+        let lineStatus = o.lineUserId ? `<span class="text-emerald-600 font-bold">🟢 ${o.lineDisplayName || '已綁定'}</span>` : `<span class="text-gray-400">未綁定</span>`;
+
+        html += `
+            <tr class="hover:bg-gray-50">
+                <td class="p-3"><span class="font-bold text-indigo-600">${o.id || ''}</span><div class="text-xs text-gray-400">${o.date || ''}</div></td>
+                <td class="p-3"><div class="font-bold text-gray-800">${o.name || ''}</div><div class="text-xs text-gray-500">${o.phone || ''}</div></td>
+                <td class="p-3 text-xs text-gray-600">${o.shippingName || ''}<br><span class="font-bold text-indigo-700">${o.storeInfo || ''}</span><br>LINE: ${lineStatus}</td>
+                <td class="p-3 text-xs text-gray-700">${itemsList}</td>
+                <td class="p-3 font-bold text-indigo-600">NT$ ${Number(o.total || 0).toLocaleString()}</td>
+                <td class="p-3">
+                    <select onchange="updateOrderStatusFromAdmin(${index}, this.value)" class="text-xs px-2 py-1 rounded-lg font-bold bg-amber-100 text-amber-800 border-0 cursor-pointer">
+                        <option value="待處理" ${o.status==='待處理'?'selected':''}>待處理</option>
+                        <option value="運送中" ${o.status==='運送中'?'selected':''}>運送中</option>
+                        <option value="已到貨" ${o.status==='已到貨'?'selected':''}>已到貨</option>
+                        <option value="已完成" ${o.status==='已完成'?'selected':''}>已完成</option>
+                    </select>
+                </td>
+                <td class="p-3 text-right"><button onclick="orders.splice(${index},1); localStorage.setItem('daigou_orders', JSON.stringify(orders)); renderAdminOrders();" class="text-rose-500 text-xs cursor-pointer"><i class="fa-solid fa-trash"></i></button></td>
+            </tr>
+        `;
+    });
+    tbody.innerHTML = html;
+}
 
         async function updateOrderStatusFromAdmin(index, newStatus) {
             orders[index].status = newStatus;
