@@ -56,8 +56,13 @@
                 </div>
             </div>
 
-            <!-- 商品展示網格 -->
-            <div id="buyer-product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+            <!-- 商品展示網格 (預設顯示加載中提示) -->
+            <div id="buyer-product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div class="col-span-full py-20 flex flex-col items-center justify-center text-gray-500">
+                    <i class="fa-solid fa-circle-notch fa-spin text-4xl text-indigo-600 mb-3"></i>
+                    <p class="text-base font-bold text-gray-700 tracking-wide">加載中 請稍後</p>
+                </div>
+            </div>
         </div>
 
         <!-- ==================== 賣家後台介面 ==================== -->
@@ -291,7 +296,7 @@
         </div>
     </div>
 
-    <!-- 購物車彈窗 (無需填寫 LINE 帳號) -->
+    <!-- 購物車彈窗 (限定台灣手機號碼) -->
     <div id="cart-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="p-5 border-b flex justify-between items-center bg-gray-50">
@@ -309,8 +314,14 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
-                        <div><label class="block text-xs font-bold text-gray-600 mb-1">收件人姓名 *</label><input type="text" id="buyer-name" class="w-full px-3 py-2 bg-white border rounded-xl text-sm"></div>
-                        <div><label class="block text-xs font-bold text-gray-600 mb-1">聯絡電話 *</label><input type="tel" id="buyer-phone" class="w-full px-3 py-2 bg-white border rounded-xl text-sm"></div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">收件人姓名 *</label>
+                            <input type="text" id="buyer-name" placeholder="請輸入真實姓名" class="w-full px-3 py-2 bg-white border rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">台灣手機號碼 *</label>
+                            <input type="tel" id="buyer-phone" maxlength="10" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="09xxxxxxxx (10碼)" class="w-full px-3 py-2 bg-white border rounded-xl text-sm">
+                        </div>
                     </div>
                     
                     <div id="store-selector-container" class="space-y-2 hidden bg-indigo-50/50 p-3.5 rounded-2xl border border-indigo-100">
@@ -376,8 +387,8 @@
             <div class="p-5 space-y-4 overflow-y-auto flex-grow">
                 <div class="flex gap-2 bg-indigo-50 p-4 rounded-2xl border border-indigo-100">
                     <div class="flex-grow">
-                        <label class="block text-xs font-bold text-indigo-900 mb-1">請輸入您的訂購手機號碼</label>
-                        <input type="tel" id="query-phone-input" placeholder="例如: 0912345678" class="w-full px-3 py-2 bg-white border rounded-xl text-sm">
+                        <label class="block text-xs font-bold text-indigo-900 mb-1">請輸入您的台灣手機號碼 (09開頭10碼)</label>
+                        <input type="tel" id="query-phone-input" maxlength="10" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="例如: 0912345678" class="w-full px-3 py-2 bg-white border rounded-xl text-sm">
                     </div>
                     <div class="flex items-end">
                         <button onclick="searchBuyerOrders()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2 rounded-xl text-sm transition shadow cursor-pointer">查詢</button>
@@ -413,23 +424,44 @@
         let cart = JSON.parse(localStorage.getItem('daigou_cart')) || [];
         
         let isAdminLoggedIn = false;
+        let isInitialLoading = true;
         let currentCategory = '全部';
         let currentUploadedImages = [];
         let viewingProductIndex = null;
 
+        // 驗證台灣手機號碼 (09開頭共10碼數字)
+        function isValidTaiwanMobile(phone) {
+            return /^09\d{8}$/.test(phone);
+        }
+
         window.addEventListener('DOMContentLoaded', async () => {
             localStorage.setItem('daigou_admin_logged', 'false');
-            await fetchCloudSettings();
-            await fetchCloudProducts();
-            await fetchCloudOrders();
             applySettings();
-            switchToBuyerView();
-            renderBuyerProducts();
             renderCategoryFilters();
-            renderAdminProducts();
-            renderAdminOrders();
-            renderSettingsPanel();
             updateCartBadge();
+
+            // 若本機已有快取商品，立即渲染以消除等待白屏；若無快取則維持「加載中 請稍後」畫面
+            if (products.length > 0) {
+                isInitialLoading = false;
+                renderBuyerProducts();
+            }
+
+            // 背景同步雲端最新資料
+            try {
+                await Promise.all([
+                    fetchCloudSettings(),
+                    fetchCloudProducts(),
+                    fetchCloudOrders()
+                ]);
+            } finally {
+                isInitialLoading = false;
+                applySettings();
+                renderCategoryFilters();
+                renderBuyerProducts();
+                renderAdminProducts();
+                renderAdminOrders();
+                renderSettingsPanel();
+            }
         });
 
         async function fetchCloudSettings() {
@@ -450,7 +482,7 @@
                 try {
                     let res = await fetch(`${settings.sheetsUrl}?action=getProducts`);
                     let cloudProducts = await res.json();
-                    if (Array.isArray(cloudProducts) && cloudProducts.length > 0) {
+                    if (Array.isArray(cloudProducts)) {
                         products = cloudProducts;
                         localStorage.setItem('daigou_products', JSON.stringify(products));
                     }
@@ -593,6 +625,16 @@
 
         function renderBuyerProducts() {
             const grid = document.getElementById('buyer-product-grid');
+            if (isInitialLoading) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-20 flex flex-col items-center justify-center text-gray-500">
+                        <i class="fa-solid fa-circle-notch fa-spin text-4xl text-indigo-600 mb-3"></i>
+                        <p class="text-base font-bold text-gray-700 tracking-wide">加載中 請稍後</p>
+                    </div>
+                `;
+                return;
+            }
+
             const keyword = String(document.getElementById('search-input').value || '').toLowerCase();
             const today = new Date().toISOString().split('T')[0];
             let filtered = products.filter(p => {
@@ -772,8 +814,21 @@
             let storeInfo = document.getElementById('buyer-store-input').value.trim();
             let shippingObj = settings.shippingMethods[document.getElementById('checkout-shipping-select').value] || settings.shippingMethods[0];
 
-            if (!name || !phone) { alert('請完整填寫收件人姓名與聯絡電話！'); return; }
-            if (shippingObj.storeType !== 'none' && !storeInfo) { alert('請先查詢並填寫取貨門市！'); return; }
+            if (!name || !phone) { 
+                alert('請完整填寫收件人姓名與台灣手機號碼！'); 
+                return; 
+            }
+
+            if (!isValidTaiwanMobile(phone)) {
+                alert('電話格式錯誤！請輸入正確的台灣手機號碼（09 開頭共 10 碼數字，例如：0912345678）。');
+                document.getElementById('buyer-phone').focus();
+                return;
+            }
+
+            if (shippingObj.storeType !== 'none' && !storeInfo) { 
+                alert('請先查詢並填寫取貨門市！'); 
+                return; 
+            }
 
             for (let item of cart) {
                 let prod = products.find(p => String(p.id) === String(item.id));
@@ -1012,6 +1067,10 @@
             let phone = document.getElementById('query-phone-input').value.trim();
             const container = document.getElementById('buyer-orders-result-container');
             if (!phone) { alert('請輸入手機號碼！'); return; }
+            if (!isValidTaiwanMobile(phone)) {
+                alert('請輸入正確的台灣手機號碼（09 開頭共 10 碼數字）！');
+                return;
+            }
             let matched = orders.filter(o => o.phone === phone);
             if (matched.length === 0) { container.innerHTML = `<div class="text-center py-8 text-rose-500 font-bold text-sm">找不到手機號碼為「${phone}」的訂單紀錄</div>`; return; }
             container.innerHTML = matched.map((o) => `
