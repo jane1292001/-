@@ -56,7 +56,7 @@
                 </div>
             </div>
 
-            <!-- 商品展示網格 (已固定圖片比例) -->
+            <!-- 商品展示網格 -->
             <div id="buyer-product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
         </div>
 
@@ -75,7 +75,7 @@
             <div id="admin-tab-products" class="space-y-6">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                     <h3 id="form-title" class="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                        <i class="fa-solid fa-circle-plus text-indigo-600 mr-2"></i>上架新商品 (手機照片自動壓縮防卡死)
+                        <i class="fa-solid fa-circle-plus text-indigo-600 mr-2"></i>上架新商品 (手機照片自動壓縮)
                     </h3>
                     <form id="product-form" onsubmit="saveProduct(event)" class="space-y-4">
                         <input type="hidden" id="edit-product-id">
@@ -152,7 +152,7 @@
                 </div>
             </div>
 
-            <!-- 分頁 2: 訂單管理 (雲端同步) -->
+            <!-- 分頁 2: 訂單管理 -->
             <div id="admin-tab-orders" class="hidden space-y-6">
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     <div class="p-4 border-b border-gray-100 flex justify-between items-center">
@@ -184,11 +184,11 @@
                 </div>
             </div>
 
-            <!-- 分頁 3: 系統設定 (增加 LINE LOGIN 密鑰動態設定) -->
+            <!-- 分頁 3: 系統設定 -->
             <div id="admin-tab-settings" class="hidden space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
-                        <h4 class="font-bold text-gray-800 text-lg border-b pb-2">基本與後台設定</h4>
+                        <h4 class="font-bold text-gray-800 text-lg border-b pb-2">基本與官方 LINE 設定</h4>
                         <div>
                             <label class="block text-xs font-bold text-gray-600 mb-1">網站名稱</label>
                             <input type="text" id="setting-brand" class="w-full px-3 py-2 border rounded-xl text-sm">
@@ -198,11 +198,12 @@
                             <input type="password" id="setting-admin-pwd" placeholder="留空則不修改 (預設 1234)" class="w-full px-3 py-2 border rounded-xl text-sm">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-600 mb-1">LINE Login Channel Secret (防護隔天失效密鑰)</label>
-                            <input type="text" id="setting-login-secret" placeholder="貼上 LINE Login 的 Channel secret" class="w-full px-3 py-2 border rounded-xl text-sm font-mono text-xs">
+                            <label class="block text-xs font-bold text-emerald-700 mb-1">官方 LINE ID (含 @ 符號，例如: @abc1234) *</label>
+                            <input type="text" id="setting-line-basic-id" placeholder="@your_official_id" class="w-full px-3 py-2 bg-emerald-50/40 border border-emerald-200 rounded-xl text-sm">
+                            <p class="text-[11px] text-gray-400 mt-1">填入此 ID 後，買家結帳點擊按鈕即可自動帶入訂單編號傳送給您。</p>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-600 mb-1">官方 LINE 連結 (例如: https://line.me/...)</label>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">官方 LINE 加好友短網址 (選填，供右下角懸浮按鈕使用)</label>
                             <input type="url" id="setting-line-url" placeholder="https://line.me/R/ti/p/@your_line_id" class="w-full px-3 py-2 border rounded-xl text-sm">
                         </div>
                         <div>
@@ -231,9 +232,9 @@
 
     <!-- 頁尾懸浮 LINE 按鈕 -->
     <div id="line-float-container" class="fixed bottom-5 right-5 z-40 hidden">
-        <a id="line-float-btn" href="#" target="_blank" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-4 py-3 rounded-full shadow-lg flex items-center space-x-2 transition cursor-pointer">
+        <a id="line-float-btn" href="#" target="_blank" class="bg-[#06C755] hover:bg-[#05b34c] text-white font-bold px-4 py-3 rounded-full shadow-lg flex items-center space-x-2 transition cursor-pointer">
             <i class="fa-brands fa-line text-2xl"></i>
-            <span class="text-xs sm:text-sm">聯繫官方 LINE</span>
+            <span class="text-xs sm:text-sm">加入官方 LINE</span>
         </a>
     </div>
 
@@ -290,7 +291,7 @@
         </div>
     </div>
 
-    <!-- 購物車彈窗 -->
+    <!-- 購物車彈窗 (無需填寫 LINE 帳號) -->
     <div id="cart-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="p-5 border-b flex justify-between items-center bg-gray-50">
@@ -341,7 +342,7 @@
         </div>
     </div>
 
-    <!-- 訂單成功與 LINE 綁定彈窗 -->
+    <!-- 訂單成功與一鍵帶入訂單編號連結 LINE 彈窗 -->
     <div id="order-success-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 text-center space-y-5">
             <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mx-auto font-black shadow-inner">
@@ -352,21 +353,13 @@
                 <p class="text-sm text-gray-500 mt-1">您的訂單編號：<span id="success-order-id" class="font-bold text-indigo-600"></span></p>
             </div>
 
-            <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-left space-y-3">
-                <div id="line-login-container">
-                    <p class="text-xs font-bold text-emerald-900 mb-1">即時接收商品進度與到貨通知：</p>
-                    <button type="button" onclick="loginWithLineAfterOrder()" class="w-full bg-[#06C755] hover:bg-[#05b34c] text-white py-2.5 px-4 rounded-xl font-bold transition flex items-center justify-center space-x-2 shadow-sm cursor-pointer">
-                        <i class="fa-brands fa-line text-xl"></i>
-                        <span>連結 LINE 帳號 (自動對應此訂單)</span>
-                    </button>
-                </div>
-                <div id="line-user-info" class="hidden flex items-center space-x-3 bg-white p-3 rounded-xl border border-emerald-200">
-                    <img id="line-avatar" class="w-10 h-10 rounded-full border border-emerald-400 shadow-xs" src="" alt="Avatar">
-                    <div class="flex-grow">
-                        <p class="font-bold text-gray-800 text-sm" id="line-name"></p>
-                        <p class="text-xs text-emerald-600 font-bold">✓ 此訂單已成功連結 LINE，到貨將自動通知！</p>
-                    </div>
-                </div>
+            <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-3">
+                <p class="text-sm font-bold text-emerald-900">請點擊下方按鈕連結官方 LINE 帳號並按下傳送，<span class="underline decoration-emerald-500 decoration-2">以利提供貨品動態</span>！</p>
+                <a id="success-line-link" href="#" target="_blank" class="w-full bg-[#06C755] hover:bg-[#05b34c] text-white py-3 px-4 rounded-xl font-bold transition flex items-center justify-center space-x-2 shadow-md cursor-pointer">
+                    <i class="fa-brands fa-line text-2xl"></i>
+                    <span>一鍵連結 LINE 帳號</span>
+                </a>
+                <p class="text-[11px] text-emerald-700">點擊後系統將自動為您帶入訂單編號</p>
             </div>
 
             <button onclick="closeOrderSuccessModal()" class="w-full bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 rounded-xl transition cursor-pointer">完成並回首頁</button>
@@ -399,16 +392,13 @@
 
     <!-- ==================== JavaScript 完整邏輯 ==================== -->
     <script>
-        const LOGIN_CHANNEL_ID = '1656553468';
-        let currentCreatedOrderId = null; 
-
         const DEFAULT_SETTINGS = {
-            brand: "參雪家帶你飛",
+            brand: "參雪家嚼感飲品 武廟店",
             adminPwd: "1234",
-            loginChannelSecret: "40a405ee1c702eb42d595cdd30f2dba2",
+            lineBasicId: "",
             lineUrl: "",
             sheetsUrl: "https://script.google.com/macros/s/AKfycbzaqb6fP1nZ5dFEmPQHHAQm5rt4AZlS5R_aV8uewSB7SzqONU0oHRZxpM58Aw5TTpAo/exec", 
-            bankInfo: "中國信託 (822) 帳號：1234-5678-9012 (戶名: 代購選物)",
+            bankInfo: "中國信託 (822) 帳號：1234-5678-9012",
             countries: ["日本代購 🇯🇵", "韓國代購 🇰🇷", "富國島代購 🇻🇳"],
             shippingMethods: [
                 { name: "7-11 店到店 (純寄件 / 須先完成轉帳)", fee: 60, type: "transfer", storeType: "711" },
@@ -428,13 +418,6 @@
         let viewingProductIndex = null;
 
         window.addEventListener('DOMContentLoaded', async () => {
-            // 偵測是否剛完成 LINE 授權跳頁
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('lineBind') === 'success') {
-                alert('LINE 帳號已成功對應綁定您的訂單！');
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-
             localStorage.setItem('daigou_admin_logged', 'false');
             await fetchCloudSettings();
             await fetchCloudProducts();
@@ -449,23 +432,19 @@
             updateCartBadge();
         });
 
-        // 🌐 從雲端讀取系統設定
         async function fetchCloudSettings() {
             if (settings.sheetsUrl) {
                 try {
                     let res = await fetch(`${settings.sheetsUrl}?action=getSettings`);
                     let cloudData = await res.json();
                     if (cloudData && cloudData.brand) {
-                        settings = cloudData;
+                        settings = Object.assign({}, DEFAULT_SETTINGS, cloudData);
                         localStorage.setItem('daigou_settings', JSON.stringify(settings));
                     }
-                } catch(e) {
-                    console.log("從雲端抓取設定失敗", e);
-                }
+                } catch(e) {}
             }
         }
 
-        // 🌐 從雲端讀取商品總表
         async function fetchCloudProducts() {
             if (settings.sheetsUrl) {
                 try {
@@ -475,13 +454,10 @@
                         products = cloudProducts;
                         localStorage.setItem('daigou_products', JSON.stringify(products));
                     }
-                } catch(e) {
-                    console.log("從雲端載入商品失敗", e);
-                }
+                } catch(e) {}
             }
         }
 
-        // 🌐 從雲端讀取所有訂單紀錄
         async function fetchCloudOrders() {
             if (settings.sheetsUrl) {
                 try {
@@ -492,29 +468,18 @@
                         localStorage.setItem('daigou_orders', JSON.stringify(orders));
                         renderAdminOrders();
                     }
-                } catch(e) {
-                    console.log("從雲端載入訂單失敗", e);
-                }
+                } catch(e) {}
             }
         }
 
-        // ☁️ 將商品總表同步推送到雲端
         async function syncProductsToCloud() {
             if (settings.sheetsUrl && products.length > 0) {
                 try {
                     await fetch(settings.sheetsUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'saveProducts',
-                            products: products
-                        })
+                        method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'saveProducts', products: products })
                     });
-                    console.log("商品已成功同步至雲端表格");
-                } catch(e) {
-                    console.log("商品雲端同步失敗", e);
-                }
+                } catch(e) {}
             }
         }
 
@@ -524,31 +489,19 @@
 
             const lineContainer = document.getElementById('line-float-container');
             const lineBtn = document.getElementById('line-float-btn');
-            if (settings.lineUrl && settings.lineUrl.trim() !== "") {
-                lineBtn.href = settings.lineUrl;
+            let targetUrl = settings.lineUrl || (settings.lineBasicId ? `https://line.me/R/ti/p/${settings.lineBasicId.startsWith('@') ? settings.lineBasicId : '@' + settings.lineBasicId}` : "");
+            
+            if (targetUrl) {
+                lineBtn.href = targetUrl;
                 lineContainer.classList.remove('hidden');
             } else {
                 lineContainer.classList.add('hidden');
             }
         }
 
-        function loginWithLineAfterOrder() {
-            if (!settings.sheetsUrl || settings.sheetsUrl.trim() === "") {
-                alert('賣家未設定 Google Sheets Web App URL，無法進行 LINE 綁定。');
-                return;
-            }
-            const stateData = {
-                url: window.location.href,
-                orderId: currentCreatedOrderId
-            };
-            const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${LOGIN_CHANNEL_ID}&redirect_uri=${encodeURIComponent(settings.sheetsUrl)}&state=${encodeURIComponent(JSON.stringify(stateData))}&scope=profile%20openid`;
-            window.location.href = lineAuthUrl; // 直接全頁跳轉更穩定
-        }
-
         function handleAdminToggle() {
-            if (isAdminLoggedIn) {
-                switchToBuyerView();
-            } else {
+            if (isAdminLoggedIn) { switchToBuyerView(); } 
+            else {
                 document.getElementById('password-modal').classList.remove('hidden');
                 document.getElementById('admin-pwd-input').value = '';
                 document.getElementById('admin-pwd-input').focus();
@@ -563,18 +516,11 @@
                 localStorage.setItem('daigou_admin_logged', 'true');
                 closePasswordModal();
                 switchToAdminView();
-            } else {
-                alert('密碼錯誤！(預設密碼為 1234)');
-            }
+            } else { alert('密碼錯誤！(預設密碼為 1234)'); }
         }
 
         function closePasswordModal() { document.getElementById('password-modal').classList.add('hidden'); }
-
-        function adminLogout() {
-            isAdminLoggedIn = false;
-            localStorage.setItem('daigou_admin_logged', 'false');
-            switchToBuyerView();
-        }
+        function adminLogout() { isAdminLoggedIn = false; localStorage.setItem('daigou_admin_logged', 'false'); switchToBuyerView(); }
 
         function switchToAdminView() {
             isAdminLoggedIn = true;
@@ -599,41 +545,22 @@
             renderBuyerProducts();
         }
 
-        // 🖼️ 處理多圖上傳並進行 Canvas 壓縮
         function handleMultipleImages(e) {
             const files = Array.from(e.target.files);
             if (files.length === 0) return;
-            if (currentUploadedImages.length + files.length > 5) {
-                alert('最多只能上傳 5 張照片！');
-                return;
-            }
-
+            if (currentUploadedImages.length + files.length > 5) { alert('最多只能上傳 5 張照片！'); return; }
             files.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(evt) {
                     const img = new Image();
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
-                        let width = img.width;
-                        let height = img.height;
-                        const maxSize = 800; // 限制最大尺寸為 800px
-
-                        if (width > height && width > maxSize) {
-                            height *= maxSize / width;
-                            width = maxSize;
-                        } else if (height > maxSize) {
-                            width *= maxSize / height;
-                            height = maxSize;
-                        }
-
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-
-                        // 壓縮為 JPEG，品質 70%
-                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                        currentUploadedImages.push(compressedDataUrl);
+                        let width = img.width, height = img.height, maxSize = 800;
+                        if (width > height && width > maxSize) { height *= maxSize / width; width = maxSize; } 
+                        else if (height > maxSize) { width *= maxSize / height; height = maxSize; }
+                        canvas.width = width; canvas.height = height;
+                        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                        currentUploadedImages.push(canvas.toDataURL('image/jpeg', 0.7));
                         renderImagePreviews();
                     };
                     img.src = evt.target.result;
@@ -645,119 +572,81 @@
         function renderImagePreviews() {
             const container = document.getElementById('multi-img-preview-container');
             document.getElementById('img-count-badge').innerText = currentUploadedImages.length;
-            if (currentUploadedImages.length === 0) {
-                container.innerHTML = `<p class="text-xs text-gray-400">尚未選擇照片</p>`;
-                return;
-            }
-            let html = '';
-            currentUploadedImages.forEach((imgSrc, idx) => {
-                html += `
-                    <div class="relative w-20 h-20 bg-gray-100 rounded-xl overflow-hidden border shadow-xs">
-                        <img src="${imgSrc}" class="w-full h-full object-cover">
-                        <button type="button" onclick="removeUploadedImg(${idx})" class="absolute top-1 right-1 bg-rose-600 text-white w-5 h-5 rounded-full text-[10px] flex items-center justify-center shadow cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
-
-        function removeUploadedImg(idx) {
-            currentUploadedImages.splice(idx, 1);
-            renderImagePreviews();
+            if (currentUploadedImages.length === 0) { container.innerHTML = `<p class="text-xs text-gray-400">尚未選擇照片</p>`; return; }
+            container.innerHTML = currentUploadedImages.map((imgSrc, idx) => `
+                <div class="relative w-20 h-20 bg-gray-100 rounded-xl overflow-hidden border shadow-xs">
+                    <img src="${imgSrc}" class="w-full h-full object-cover">
+                    <button type="button" onclick="currentUploadedImages.splice(${idx},1); renderImagePreviews();" class="absolute top-1 right-1 bg-rose-600 text-white w-5 h-5 rounded-full text-[10px] flex items-center justify-center shadow cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            `).join('');
         }
 
         function renderCategoryFilters() {
             const container = document.getElementById('category-filter-container');
             if (!container) return;
-            let html = `<button onclick="filterCategory('全部')" class="px-4 py-2 rounded-xl text-xs font-bold transition ${currentCategory === '全部' ? 'bg-indigo-600 text-white shadow' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'} cursor-pointer">全部商品</button>`;
+            let html = `<button onclick="currentCategory='全部'; renderCategoryFilters(); renderBuyerProducts();" class="px-4 py-2 rounded-xl text-xs font-bold transition ${currentCategory === '全部' ? 'bg-indigo-600 text-white shadow' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'} cursor-pointer">全部商品</button>`;
             settings.countries.forEach(c => {
-                html += `<button onclick="filterCategory('${c}')" class="px-4 py-2 rounded-xl text-xs font-bold transition ${currentCategory === c ? 'bg-indigo-600 text-white shadow' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'} cursor-pointer">${c}</button>`;
+                html += `<button onclick="currentCategory='${c}'; renderCategoryFilters(); renderBuyerProducts();" class="px-4 py-2 rounded-xl text-xs font-bold transition ${currentCategory === c ? 'bg-indigo-600 text-white shadow' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'} cursor-pointer">${c}</button>`;
             });
             container.innerHTML = html;
         }
 
-        function filterCategory(cat) {
-            currentCategory = cat;
-            renderCategoryFilters();
-            renderBuyerProducts();
-        }
-
         function renderBuyerProducts() {
-    const grid = document.getElementById('buyer-product-grid');
-    const keyword = String(document.getElementById('search-input').value || '').toLowerCase();
-    const today = new Date().toISOString().split('T')[0];
-    
-    // 🛡️ 根本防呆：強制將所有欄位轉為字串與陣列檢查，絕對不允許因型別錯誤崩潰
-    let filtered = products.filter(p => {
-        if (!p) return false;
-        let nameStr = String(p.name || '').toLowerCase();
-        let descStr = String(p.desc || '').toLowerCase();
-        let countryStr = String(p.country || '');
-        
-        let matchCat = (currentCategory === '全部' || countryStr === currentCategory);
-        let matchKey = nameStr.includes(keyword) || descStr.includes(keyword);
-        return matchCat && matchKey;
-    });
+            const grid = document.getElementById('buyer-product-grid');
+            const keyword = String(document.getElementById('search-input').value || '').toLowerCase();
+            const today = new Date().toISOString().split('T')[0];
+            let filtered = products.filter(p => {
+                if (!p) return false;
+                let matchCat = (currentCategory === '全部' || String(p.country) === currentCategory);
+                let matchKey = String(p.name || '').toLowerCase().includes(keyword) || String(p.desc || '').toLowerCase().includes(keyword);
+                return matchCat && matchKey;
+            });
 
-    if (filtered.length === 0) {
-        grid.innerHTML = `<div class="col-span-full py-12 text-center text-gray-400"><i class="fa-solid fa-box-open text-4xl mb-2"></i><p>沒有找到相關代購商品</p></div>`;
-        return;
-    }
+            if (filtered.length === 0) { grid.innerHTML = `<div class="col-span-full py-12 text-center text-gray-400"><i class="fa-solid fa-box-open text-4xl mb-2"></i><p>沒有找到相關代購商品</p></div>`; return; }
+            grid.innerHTML = filtered.map((p) => {
+                let realIndex = products.findIndex(item => item && String(item.id) === String(p.id));
+                let mainImg = (Array.isArray(p.images) && p.images.length > 0) ? p.images[0] : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff';
+                let stockNum = p.stock !== undefined ? parseInt(p.stock) : 99;
+                let isExpired = p.deadline && p.deadline < today;
+                let isSoldOut = stockNum <= 0;
+                let canBuy = !isExpired && !isSoldOut;
+                let statusBadge = isExpired ? `<span class="absolute top-3 right-3 bg-rose-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-xs">已截止登記</span>` : (isSoldOut ? `<span class="absolute top-3 right-3 bg-gray-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-xs">已售完</span>` : '');
 
-    let html = '';
-    filtered.forEach((p) => {
-        let realIndex = products.findIndex(item => item && String(item.id) === String(p.id));
-        let mainImg = (Array.isArray(p.images) && p.images.length > 0) ? p.images[0] : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff';
-        
-        let stockNum = p.stock !== undefined ? parseInt(p.stock) : 99;
-        let isExpired = p.deadline && p.deadline < today;
-        let isSoldOut = stockNum <= 0;
-        let canBuy = !isExpired && !isSoldOut;
-
-        let statusBadge = '';
-        if (isExpired) {
-            statusBadge = `<span class="absolute top-3 right-3 bg-rose-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-xs">已截止登記</span>`;
-        } else if (isSoldOut) {
-            statusBadge = `<span class="absolute top-3 right-3 bg-gray-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-xs">已售完</span>`;
+                return `
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col group hover:shadow-md transition cursor-pointer" onclick="openProductDetailByIndex(${realIndex})">
+                        <div class="relative aspect-square overflow-hidden bg-gray-100">
+                            <img src="${mainImg}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            <span class="absolute top-3 left-3 bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold px-2.5 py-1 rounded-full">${p.country || ''}</span>
+                            ${statusBadge}
+                        </div>
+                        <div class="p-4 flex flex-col flex-grow justify-between">
+                            <div>
+                                <h4 class="font-bold text-gray-900 text-sm line-clamp-1 mb-1">${p.name || '未命名商品'}</h4>
+                                <p class="text-xs text-gray-500 line-clamp-2 mb-2">${p.desc || '無詳細說明'}</p>
+                            </div>
+                            <div>
+                                <div class="text-[11px] text-gray-400 flex justify-between mb-2 font-medium">
+                                    <span>剩餘庫存: ${stockNum}</span>
+                                    <span>${p.deadline ? '截止: ' + p.deadline : ''}</span>
+                                </div>
+                                <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                                    <span class="text-base font-black text-indigo-600">NT$ ${Number(p.price || 0).toLocaleString()}</span>
+                                    <button type="button" onclick="event.stopPropagation(); addToCartByIndex(${realIndex}, 1)" ${canBuy ? '' : 'disabled'} class="${canBuy ? 'bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white cursor-pointer' : 'bg-gray-100 text-gray-400 cursor-not-allowed'} px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1">
+                                        <i class="fa-solid ${isExpired ? 'fa-calendar-xmark' : (isSoldOut ? 'fa-ban' : 'fa-cart-plus')}"></i>
+                                        <span>${isExpired ? '已截止' : (isSoldOut ? '售完' : '加購')}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
-
-        html += `
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col group hover:shadow-md transition cursor-pointer" onclick="openProductDetailByIndex(${realIndex})">
-                <div class="relative aspect-square overflow-hidden bg-gray-100">
-                    <img src="${mainImg}" alt="${p.name || ''}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-                    <span class="absolute top-3 left-3 bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold px-2.5 py-1 rounded-full">${p.country || ''}</span>
-                    ${statusBadge}
-                </div>
-                <div class="p-4 flex flex-col flex-grow justify-between">
-                    <div>
-                        <h4 class="font-bold text-gray-900 text-sm line-clamp-1 mb-1">${p.name || '未命名商品'}</h4>
-                        <p class="text-xs text-gray-500 line-clamp-2 mb-2">${p.desc || '無詳細說明'}</p>
-                    </div>
-                    <div>
-                        <div class="text-[11px] text-gray-400 flex justify-between mb-2 font-medium">
-                            <span>剩餘庫存: ${stockNum}</span>
-                            <span>${p.deadline ? '截止: ' + p.deadline : ''}</span>
-                        </div>
-                        <div class="flex items-center justify-between pt-2 border-t border-gray-100">
-                            <span class="text-base font-black text-indigo-600">NT$ ${Number(p.price || 0).toLocaleString()}</span>
-                            <button type="button" onclick="event.stopPropagation(); addToCartByIndex(${realIndex}, 1)" ${canBuy ? '' : 'disabled'} class="${canBuy ? 'bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white cursor-pointer' : 'bg-gray-100 text-gray-400 cursor-not-allowed'} px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1">
-                                <i class="fa-solid ${isExpired ? 'fa-calendar-xmark' : (isSoldOut ? 'fa-ban' : 'fa-cart-plus')}"></i>
-                                <span>${isExpired ? '已截止' : (isSoldOut ? '售完' : '加購')}</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    });
-    grid.innerHTML = html;
-}
 
         function openProductDetailByIndex(index) {
             let p = products[index];
             if (!p) return;
             viewingProductIndex = index;
-
             const today = new Date().toISOString().split('T')[0];
             let stockNum = p.stock !== undefined ? parseInt(p.stock) : 99;
             let isExpired = p.deadline && p.deadline < today;
@@ -774,63 +663,33 @@
             const badgeContainer = document.getElementById('modal-p-status-badge');
             let infoText = `<span class="text-xs text-gray-500 font-bold mr-3">剩餘庫存：${stockNum}</span>`;
             if (p.deadline) infoText += `<span class="text-xs text-gray-500 font-bold">登記截止日：${p.deadline}</span>`;
-            
-            if (isExpired) {
-                badgeContainer.innerHTML = `${infoText} <span class="ml-2 bg-rose-100 text-rose-700 text-xs px-2 py-0.5 rounded font-bold">已截止登記</span>`;
-            } else if (isSoldOut) {
-                badgeContainer.innerHTML = `${infoText} <span class="ml-2 bg-gray-200 text-gray-700 text-xs px-2 py-0.5 rounded font-bold">已售完</span>`;
-            } else {
-                badgeContainer.innerHTML = infoText;
-            }
+            badgeContainer.innerHTML = infoText + (isExpired ? `<span class="ml-2 bg-rose-100 text-rose-700 text-xs px-2 py-0.5 rounded font-bold">已截止登記</span>` : (isSoldOut ? `<span class="ml-2 bg-gray-200 text-gray-700 text-xs px-2 py-0.5 rounded font-bold">已售完</span>` : ''));
 
             const addBtn = document.getElementById('modal-add-cart-btn');
-            if (canBuy) {
-                addBtn.disabled = false;
-                addBtn.className = "w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow transition cursor-pointer flex items-center justify-center space-x-2";
-                addBtn.innerHTML = `<i class="fa-solid fa-cart-plus"></i><span>加入購物車</span>`;
-            } else {
-                addBtn.disabled = true;
-                addBtn.className = "w-full bg-gray-200 text-gray-400 font-bold py-3 rounded-xl cursor-not-allowed flex items-center justify-center space-x-2";
-                addBtn.innerHTML = `<i class="fa-solid ${isExpired ? 'fa-calendar-xmark' : 'fa-ban'}"></i><span>${isExpired ? '此商品已截止登記' : '此商品已售完'}</span>`;
-            }
+            addBtn.disabled = !canBuy;
+            addBtn.className = canBuy ? "w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow transition cursor-pointer flex items-center justify-center space-x-2" : "w-full bg-gray-200 text-gray-400 font-bold py-3 rounded-xl cursor-not-allowed flex items-center justify-center space-x-2";
+            addBtn.innerHTML = `<i class="fa-solid ${canBuy ? 'fa-cart-plus' : 'fa-ban'}"></i><span>${canBuy ? '加入購物車' : (isExpired ? '已截止登記' : '已售完')}</span>`;
 
             let imgs = (p.images && p.images.length > 0) ? p.images : ['https://images.unsplash.com/photo-1542291026-7eec264c27ff'];
             document.getElementById('modal-main-img').src = imgs[0];
-            
-            const thumbContainer = document.getElementById('modal-thumb-list');
-            if (imgs.length > 1) {
-                thumbContainer.innerHTML = imgs.map(img => `
-                    <img src="${img}" onclick="document.getElementById('modal-main-img').src='${img}'" class="w-12 h-12 object-cover rounded-lg border cursor-pointer hover:opacity-80">
-                `).join('');
-            } else {
-                thumbContainer.innerHTML = '';
-            }
-
+            document.getElementById('modal-thumb-list').innerHTML = imgs.length > 1 ? imgs.map(img => `<img src="${img}" onclick="document.getElementById('modal-main-img').src='${img}'" class="w-12 h-12 object-cover rounded-lg border cursor-pointer hover:opacity-80">`).join('') : '';
             document.getElementById('product-detail-modal').classList.remove('hidden');
         }
 
         function changeModalQuantity(delta) {
             let input = document.getElementById('modal-qty-input');
-            let current = parseInt(input.value) || 1;
-            let val = current + delta;
-            
+            let val = (parseInt(input.value) || 1) + delta;
             if (viewingProductIndex !== null) {
-                let p = products[viewingProductIndex];
-                let maxStock = p.stock !== undefined ? parseInt(p.stock) : 99;
-                if (val > maxStock) {
-                    alert(`加購數量不能超過剩餘庫存量 (${maxStock})！`);
-                    val = maxStock;
-                }
+                let maxStock = products[viewingProductIndex].stock !== undefined ? parseInt(products[viewingProductIndex].stock) : 99;
+                if (val > maxStock) { alert(`不能超過剩餘庫存 (${maxStock})！`); val = maxStock; }
             }
-
             if (val < 1) val = 1;
             input.value = val;
         }
 
         function addCurrentViewingProductToCart() {
             if (viewingProductIndex !== null) {
-                let qty = parseInt(document.getElementById('modal-qty-input').value) || 1;
-                addToCartByIndex(viewingProductIndex, qty);
+                addToCartByIndex(viewingProductIndex, parseInt(document.getElementById('modal-qty-input').value) || 1);
                 closeProductModal();
             }
         }
@@ -840,115 +699,69 @@
         function addToCartByIndex(index, quantity = 1) {
             let prod = products[index];
             if (!prod) return;
-
             const today = new Date().toISOString().split('T')[0];
-            if (prod.deadline && prod.deadline < today) {
-                alert('該商品已超過登記截止日期，無法下單！');
-                return;
-            }
-
+            if (prod.deadline && prod.deadline < today) { alert('該商品已超過登記截止日期！'); return; }
             let maxStock = prod.stock !== undefined ? parseInt(prod.stock) : 99;
             let exist = cart.find(item => String(item.id) === String(prod.id));
-            let currentCartQty = exist ? exist.qty : 0;
+            if ((exist ? exist.qty : 0) + quantity > maxStock) { alert(`庫存不足！`); return; }
 
-            if (currentCartQty + quantity > maxStock) {
-                alert(`無法加入！目前購物車已有 ${currentCartQty} 件，商品剩餘庫存僅為 ${maxStock} 件。`);
-                return;
-            }
-
-            let mainImg = (prod.images && prod.images.length > 0) ? prod.images[0] : '';
             if (exist) { exist.qty += quantity; } 
-            else { cart.push({ id: prod.id, name: prod.name, price: prod.price, image: mainImg, qty: quantity }); }
-
-            saveCart(); updateCartBadge();
-            alert(`已成功將 ${quantity} 件「${prod.name}」加入購物車！`);
+            else { cart.push({ id: prod.id, name: prod.name, price: prod.price, image: (prod.images && prod.images[0]) || '', qty: quantity }); }
+            localStorage.setItem('daigou_cart', JSON.stringify(cart));
+            updateCartBadge();
+            alert(`已將 ${quantity} 件「${prod.name}」加入購物車！`);
         }
 
-        function saveCart() { localStorage.setItem('daigou_cart', JSON.stringify(cart)); }
         function updateCartBadge() { document.getElementById('cart-badge').innerText = cart.reduce((sum, item) => sum + item.qty, 0); }
-
-        function openCartModal() { 
-            renderCartItems(); 
-            renderShippingDropdown(); 
-            updateCartTotal(); 
-            document.getElementById('cart-modal').classList.remove('hidden'); 
-        }
-
+        function openCartModal() { renderCartItems(); renderShippingDropdown(); updateCartTotal(); document.getElementById('cart-modal').classList.remove('hidden'); }
         function closeCartModal() { document.getElementById('cart-modal').classList.add('hidden'); }
 
         function renderShippingDropdown() {
-            const select = document.getElementById('checkout-shipping-select');
-            let html = '';
-            settings.shippingMethods.forEach((s, idx) => { html += `<option value="${idx}">${s.name} (運費 NT$ ${s.fee})</option>`; });
-            select.innerHTML = html;
+            document.getElementById('checkout-shipping-select').innerHTML = settings.shippingMethods.map((s, idx) => `<option value="${idx}">${s.name} (運費 NT$ ${s.fee})</option>`).join('');
         }
 
         function renderCartItems() {
             const container = document.getElementById('cart-items-container');
             if (cart.length === 0) { container.innerHTML = `<div class="py-8 text-center text-gray-400"><p>購物車目前是空的</p></div>`; return; }
-            let html = '';
-            cart.forEach((item, index) => {
-                html += `
-                    <div class="flex items-center justify-between gap-3 py-2">
-                        <img src="${item.image}" class="w-12 h-12 object-cover rounded-xl border">
-                        <div class="flex-grow"><h5 class="font-bold text-xs text-gray-800 line-clamp-1">${item.name}</h5><p class="text-xs text-indigo-600 font-bold">NT$ ${item.price.toLocaleString()}</p></div>
-                        <div class="flex items-center space-x-2">
-                            <button onclick="changeQty(${index}, -1)" class="w-6 h-6 rounded-lg bg-gray-100 font-bold text-xs">-</button>
-                            <span class="text-xs font-bold w-5 text-center">${item.qty}</span>
-                            <button onclick="changeQty(${index}, 1)" class="w-6 h-6 rounded-lg bg-gray-100 font-bold text-xs">+</button>
-                            <button onclick="removeItem(${index})" class="text-gray-400 hover:text-rose-500 ml-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
-                        </div>
+            container.innerHTML = cart.map((item, index) => `
+                <div class="flex items-center justify-between gap-3 py-2">
+                    <img src="${item.image}" class="w-12 h-12 object-cover rounded-xl border">
+                    <div class="flex-grow"><h5 class="font-bold text-xs text-gray-800 line-clamp-1">${item.name}</h5><p class="text-xs text-indigo-600 font-bold">NT$ ${item.price.toLocaleString()}</p></div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="changeQty(${index}, -1)" class="w-6 h-6 rounded-lg bg-gray-100 font-bold text-xs">-</button>
+                        <span class="text-xs font-bold w-5 text-center">${item.qty}</span>
+                        <button onclick="changeQty(${index}, 1)" class="w-6 h-6 rounded-lg bg-gray-100 font-bold text-xs">+</button>
+                        <button onclick="cart.splice(${index},1); localStorage.setItem('daigou_cart', JSON.stringify(cart)); updateCartBadge(); renderCartItems(); updateCartTotal();" class="text-gray-400 hover:text-rose-500 ml-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
                     </div>
-                `;
-            });
-            container.innerHTML = html;
+                </div>
+            `).join('');
         }
 
         function changeQty(index, delta) {
             let item = cart[index];
             let prod = products.find(p => String(p.id) === String(item.id));
-            if (delta > 0 && prod) {
-                let maxStock = prod.stock !== undefined ? parseInt(prod.stock) : 99;
-                if (item.qty + 1 > maxStock) {
-                    alert(`已達庫存上限 (${maxStock})！`);
-                    return;
-                }
-            }
+            if (delta > 0 && prod && item.qty + 1 > (prod.stock !== undefined ? parseInt(prod.stock) : 99)) { alert('已達庫存上限！'); return; }
             item.qty += delta;
             if (item.qty <= 0) cart.splice(index, 1);
-            saveCart(); updateCartBadge(); renderCartItems(); updateCartTotal();
+            localStorage.setItem('daigou_cart', JSON.stringify(cart));
+            updateCartBadge(); renderCartItems(); updateCartTotal();
         }
-
-        function removeItem(index) { cart.splice(index, 1); saveCart(); updateCartBadge(); renderCartItems(); updateCartTotal(); }
 
         function updateCartTotal() {
             let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            let shippingIdx = document.getElementById('checkout-shipping-select').value;
-            let selectedShipping = settings.shippingMethods[shippingIdx] || settings.shippingMethods[0];
+            let selectedShipping = settings.shippingMethods[document.getElementById('checkout-shipping-select').value] || settings.shippingMethods[0];
             let shippingFee = selectedShipping ? selectedShipping.fee : 0;
-
             document.getElementById('cart-subtotal').innerText = subtotal.toLocaleString();
             document.getElementById('cart-shipping-fee').innerText = shippingFee.toLocaleString();
             document.getElementById('cart-total').innerText = (subtotal + shippingFee).toLocaleString();
 
             const storeContainer = document.getElementById('store-selector-container');
-            const storeBtnText = document.getElementById('store-map-btn-text');
-            const storeLabelTitle = document.getElementById('store-label-title');
-            const storeMapLink = document.getElementById('store-map-link');
-
-            if (selectedShipping.storeType === '711') {
+            if (selectedShipping.storeType !== 'none') {
                 storeContainer.classList.remove('hidden');
-                storeBtnText.innerText = "點擊開啟 7-11 地圖查詢";
-                storeLabelTitle.innerText = "7-11 取貨門市 *";
-                storeMapLink.href = "https://emap.presco.com.tw/c2cemap.ashx";
-            } else if (selectedShipping.storeType === 'family') {
-                storeContainer.classList.remove('hidden');
-                storeBtnText.innerText = "點擊開啟 全家 地圖查詢";
-                storeLabelTitle.innerText = "全家 取貨門市 *";
-                storeMapLink.href = "https://www.family.com.tw/marketing/inquiry.aspx";
-            } else {
-                storeContainer.classList.add('hidden');
-            }
+                document.getElementById('store-map-btn-text').innerText = selectedShipping.storeType === '711' ? "點擊開啟 7-11 地圖查詢" : "點擊開啟 全家 地圖查詢";
+                document.getElementById('store-label-title').innerText = selectedShipping.storeType === '711' ? "7-11 取貨門市 *" : "全家 取貨門市 *";
+                document.getElementById('store-map-link').href = selectedShipping.storeType === '711' ? "https://emap.presco.com.tw/c2cemap.ashx" : "https://www.family.com.tw/marketing/inquiry.aspx";
+            } else { storeContainer.classList.add('hidden'); }
         }
 
         async function submitOrder() {
@@ -957,24 +770,15 @@
             let phone = document.getElementById('buyer-phone').value.trim();
             let note = document.getElementById('buyer-note').value.trim();
             let storeInfo = document.getElementById('buyer-store-input').value.trim();
+            let shippingObj = settings.shippingMethods[document.getElementById('checkout-shipping-select').value] || settings.shippingMethods[0];
 
-            let shippingIdx = document.getElementById('checkout-shipping-select').value;
-            let shippingObj = settings.shippingMethods[shippingIdx] || settings.shippingMethods[0];
-
-            if (!name || !phone) { alert('請完整填寫收件人姓名與電話！'); return; }
-
-            if (shippingObj.storeType !== 'none' && !storeInfo) {
-                alert(`請先點擊上方按鈕查詢 ${shippingObj.storeType === '711' ? '7-11' : '全家'} 門市，並將店名貼入欄位中！`);
-                return;
-            }
+            if (!name || !phone) { alert('請完整填寫收件人姓名與聯絡電話！'); return; }
+            if (shippingObj.storeType !== 'none' && !storeInfo) { alert('請先查詢並填寫取貨門市！'); return; }
 
             for (let item of cart) {
                 let prod = products.find(p => String(p.id) === String(item.id));
                 if (prod && prod.stock !== undefined) {
-                    if (prod.stock < item.qty) {
-                        alert(`商品「${prod.name}」剩餘庫存不足，無法完成訂單！`);
-                        return;
-                    }
+                    if (prod.stock < item.qty) { alert(`商品「${prod.name}」庫存不足！`); return; }
                     prod.stock -= item.qty;
                 }
             }
@@ -982,23 +786,14 @@
             syncProductsToCloud();
 
             let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            let total = subtotal + shippingObj.fee;
             let orderId = 'ORD-' + Date.now().toString().slice(-6);
-            currentCreatedOrderId = orderId;
 
             let newOrder = {
-                id: orderId, 
-                date: new Date().toLocaleString(), 
-                name, 
-                phone,
-                shippingName: shippingObj.name,
-                shippingFee: shippingObj.fee,
-                storeInfo: storeInfo || '面交自取',
-                lineUserId: '',
-                lineDisplayName: '',
+                id: orderId, date: new Date().toLocaleString(), name, phone,
+                shippingName: shippingObj.name, shippingFee: shippingObj.fee,
+                storeInfo: storeInfo || '面交自取', note: note,
                 rawItems: cart.map(i => ({ name: i.name, qty: i.qty, price: i.price })),
-                total, 
-                status: '待處理'
+                total: subtotal + shippingObj.fee, status: '待處理'
             };
 
             orders.unshift(newOrder);
@@ -1006,28 +801,36 @@
 
             if (settings.sheetsUrl) {
                 try {
-                    await fetch(settings.sheetsUrl, { 
-                        method: 'POST', 
-                        mode: 'no-cors', 
-                        headers: { 'Content-Type': 'application/json' }, 
-                        body: JSON.stringify({ action: 'createOrder', ...newOrder }) 
+                    await fetch(settings.sheetsUrl, {
+                        method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'createOrder', ...newOrder })
                     });
-                } catch(e) { console.log(e); }
+                } catch(e) {}
             }
 
-            cart = []; saveCart(); updateCartBadge(); closeCartModal();
+            cart = []; localStorage.setItem('daigou_cart', JSON.stringify(cart)); updateCartBadge(); closeCartModal();
             renderBuyerProducts();
             renderAdminOrders();
 
+            // 產生帶有訂單編號的 LINE 自動訊息連結 (oaMessage)
             document.getElementById('success-order-id').innerText = orderId;
-            document.getElementById('line-login-container').classList.remove('hidden');
-            document.getElementById('line-user-info').classList.add('hidden');
+            const officialLink = document.getElementById('success-line-link');
+            let prefillMsg = encodeURIComponent(`您好，我要回報訂單編號：${orderId}`);
+            
+            if (settings.lineBasicId && settings.lineBasicId.trim() !== "") {
+                let cleanId = settings.lineBasicId.trim();
+                if (!cleanId.startsWith('@')) cleanId = '@' + cleanId;
+                officialLink.href = `https://line.me/R/oaMessage/${cleanId}/?${prefillMsg}`;
+            } else if (settings.lineUrl && settings.lineUrl.trim() !== "") {
+                officialLink.href = settings.lineUrl;
+            } else {
+                officialLink.href = "#";
+            }
+
             document.getElementById('order-success-modal').classList.remove('hidden');
         }
 
-        function closeOrderSuccessModal() {
-            document.getElementById('order-success-modal').classList.add('hidden');
-        }
+        function closeOrderSuccessModal() { document.getElementById('order-success-modal').classList.add('hidden'); }
 
         function switchAdminTab(tab) {
             ['products', 'orders', 'settings'].forEach(t => {
@@ -1049,29 +852,13 @@
             let deadline = document.getElementById('p-deadline').value;
             let desc = document.getElementById('p-desc').value.trim();
 
-            if (currentUploadedImages.length === 0 && !editId) {
-                alert('請至少選擇 1 張商品照片！');
-                return;
-            }
+            if (currentUploadedImages.length === 0 && !editId) { alert('請至少選擇 1 張商品照片！'); return; }
 
             if (editId) {
                 let p = products.find(item => String(item.id) === String(editId));
-                if (p) {
-                    p.name = name;
-                    p.country = country;
-                    p.price = price;
-                    p.stock = stock;
-                    p.deadline = deadline;
-                    p.desc = desc;
-                    if (currentUploadedImages.length > 0) p.images = [...currentUploadedImages];
-                }
+                if (p) { p.name = name; p.country = country; p.price = price; p.stock = stock; p.deadline = deadline; p.desc = desc; if (currentUploadedImages.length > 0) p.images = [...currentUploadedImages]; }
             } else {
-                let newProd = {
-                    id: "p_" + Date.now(),
-                    name, country, price, stock, deadline, desc,
-                    images: [...currentUploadedImages]
-                };
-                products.unshift(newProd);
+                products.unshift({ id: "p_" + Date.now(), name, country, price, stock, deadline, desc, images: [...currentUploadedImages] });
             }
 
             localStorage.setItem('daigou_products', JSON.stringify(products));
@@ -1079,7 +866,7 @@
             resetProductForm();
             renderAdminProducts();
             renderBuyerProducts();
-            alert(editId ? '商品資料修改成功並已同步至雲端！' : '新商品已上架並同步至雲端！');
+            alert(editId ? '商品修改成功並已同步！' : '新商品已上架並同步！');
         }
 
         function editProductByIndex(idx) {
@@ -1092,11 +879,9 @@
             document.getElementById('p-stock').value = p.stock !== undefined ? p.stock : 10;
             document.getElementById('p-deadline').value = p.deadline || '';
             document.getElementById('p-desc').value = p.desc || '';
-
             currentUploadedImages = p.images ? [...p.images] : [];
             renderImagePreviews();
-
-            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-[#f59e0b] fa-pen-to-square text-amber-500 mr-2"></i>編輯商品資料`;
+            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-amber-500 mr-2"></i>編輯商品資料`;
             document.getElementById('cancel-edit-btn').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -1106,111 +891,76 @@
             document.getElementById('edit-product-id').value = '';
             currentUploadedImages = [];
             renderImagePreviews();
-            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-circle-plus text-indigo-600 mr-2"></i>上架新商品 (建議上傳 1MB 以下照片)`;
+            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-circle-plus text-indigo-600 mr-2"></i>上架新商品 (手機照片自動壓縮)`;
             document.getElementById('cancel-edit-btn').classList.add('hidden');
         }
 
         function renderAdminProducts() {
             const tbody = document.getElementById('admin-product-table');
             document.getElementById('product-count').innerText = products.length;
-            const select = document.getElementById('p-country');
-            select.innerHTML = settings.countries.map(c => `<option value="${c}">${c}</option>`).join('');
-
+            document.getElementById('p-country').innerHTML = settings.countries.map(c => `<option value="${c}">${c}</option>`).join('');
             if (products.length === 0) { tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">尚無商品</td></tr>`; return; }
-            let html = '';
-            products.forEach((p, idx) => {
-                let mainImg = (p.images && p.images.length > 0) ? p.images[0] : '';
-                let stockNum = p.stock !== undefined ? p.stock : 10;
-                let deadlineStr = p.deadline || '無限制';
-                html += `
+            tbody.innerHTML = products.map((p, idx) => `
+                <tr class="hover:bg-gray-50">
+                    <td class="p-3"><img src="${(p.images && p.images[0]) || ''}" class="w-10 h-10 object-cover rounded-lg border"></td>
+                    <td class="p-3 font-bold text-gray-800">${p.name}</td>
+                    <td class="p-3"><span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs font-bold">${p.country}</span></td>
+                    <td class="p-3 font-bold text-indigo-600">NT$ ${p.price.toLocaleString()}</td>
+                    <td class="p-3 font-bold ${(p.stock || 0) <= 0 ? 'text-rose-600' : 'text-gray-700'}">${p.stock !== undefined ? p.stock : 10}</td>
+                    <td class="p-3 text-xs text-gray-500">${p.deadline || '無限制'}</td>
+                    <td class="p-3 text-right space-x-2">
+                        <button onclick="editProductByIndex(${idx})" class="text-amber-600 font-bold text-xs cursor-pointer"><i class="fa-solid fa-pen"></i> 編輯</button>
+                        <button onclick="if(confirm('確定刪除？')){products.splice(${idx},1); localStorage.setItem('daigou_products', JSON.stringify(products)); syncProductsToCloud(); renderAdminProducts(); renderBuyerProducts();}" class="text-rose-500 font-bold text-xs cursor-pointer"><i class="fa-solid fa-trash"></i> 刪除</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderAdminOrders() {
+            const tbody = document.getElementById('admin-order-table');
+            document.getElementById('order-count').innerText = orders.length;
+            if (!orders || orders.length === 0) { tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">尚無訂單</td></tr>`; return; }
+            tbody.innerHTML = orders.map((o, index) => {
+                let itemsList = Array.isArray(o.rawItems) ? o.rawItems.map(i => `${i.name || '商品'} x${i.qty || 1}`).join('<br>') : String(o.rawItems || '無明細');
+                return `
                     <tr class="hover:bg-gray-50">
-                        <td class="p-3"><img src="${mainImg}" class="w-10 h-10 object-cover rounded-lg border"></td>
-                        <td class="p-3 font-bold text-gray-800">${p.name}</td>
-                        <td class="p-3"><span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs font-bold">${p.country}</span></td>
-                        <td class="p-3 font-bold text-indigo-600">NT$ ${p.price.toLocaleString()}</td>
-                        <td class="p-3 font-bold ${stockNum <= 0 ? 'text-rose-600' : 'text-gray-700'}">${stockNum}</td>
-                        <td class="p-3 text-xs text-gray-500">${deadlineStr}</td>
-                        <td class="p-3 text-right space-x-2">
-                            <button onclick="editProductByIndex(${idx})" class="text-amber-600 font-bold text-xs cursor-pointer"><i class="fa-solid fa-pen"></i> 編輯</button>
-                            <button onclick="deleteProductByIndex(${idx})" class="text-rose-500 font-bold text-xs cursor-pointer"><i class="fa-solid fa-trash"></i> 刪除</button>
+                        <td class="p-3"><span class="font-bold text-indigo-600">${o.id || ''}</span><div class="text-xs text-gray-400">${o.date || ''}</div></td>
+                        <td class="p-3"><div class="font-bold text-gray-800">${o.name || ''}</div><div class="text-xs text-gray-500">${o.phone || ''}</div></td>
+                        <td class="p-3 text-xs text-gray-600">${o.shippingName || ''}<br><span class="font-bold text-indigo-700">${o.storeInfo || ''}</span></td>
+                        <td class="p-3 text-xs text-gray-700">${itemsList}</td>
+                        <td class="p-3 font-bold text-indigo-600">NT$ ${Number(o.total || 0).toLocaleString()}</td>
+                        <td class="p-3">
+                            <select onchange="updateOrderStatusFromAdmin(${index}, this.value)" class="text-xs px-2 py-1 rounded-lg font-bold bg-amber-100 text-amber-800 border-0 cursor-pointer">
+                                <option value="待處理" ${o.status==='待處理'?'selected':''}>待處理</option>
+                                <option value="運送中" ${o.status==='運送中'?'selected':''}>運送中</option>
+                                <option value="已到貨" ${o.status==='已到貨'?'selected':''}>已到貨</option>
+                                <option value="已完成" ${o.status==='已完成'?'selected':''}>已完成</option>
+                            </select>
                         </td>
+                        <td class="p-3 text-right"><button onclick="orders.splice(${index},1); localStorage.setItem('daigou_orders', JSON.stringify(orders)); renderAdminOrders();" class="text-rose-500 text-xs cursor-pointer"><i class="fa-solid fa-trash"></i></button></td>
                     </tr>
                 `;
-            });
-            tbody.innerHTML = html;
+            }).join('');
         }
-
-        function deleteProductByIndex(idx) {
-            if (confirm(`確定要刪除商品「${products[idx].name}」嗎？`)) {
-                products.splice(idx, 1);
-                localStorage.setItem('daigou_products', JSON.stringify(products));
-                syncProductsToCloud();
-                renderAdminProducts();
-                renderBuyerProducts();
-            }
-        }
-
-function renderAdminOrders() {
-    const tbody = document.getElementById('admin-order-table');
-    document.getElementById('order-count').innerText = orders.length;
-    if (!orders || orders.length === 0) { tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">尚無訂單</td></tr>`; return; }
-    
-    let html = '';
-    orders.forEach((o, index) => {
-        // 🛡️ 根本防呆：確保 rawItems 不論是陣列、字串還是空值都能安全顯示
-        let itemsList = '';
-        if (Array.isArray(o.rawItems)) {
-            itemsList = o.rawItems.map(i => `${i.name || '商品'} x${i.qty || 1}`).join('<br>');
-        } else {
-            itemsList = String(o.rawItems || '無明細');
-        }
-        
-        let lineStatus = o.lineUserId ? `<span class="text-emerald-600 font-bold">🟢 ${o.lineDisplayName || '已綁定'}</span>` : `<span class="text-gray-400">未綁定</span>`;
-
-        html += `
-            <tr class="hover:bg-gray-50">
-                <td class="p-3"><span class="font-bold text-indigo-600">${o.id || ''}</span><div class="text-xs text-gray-400">${o.date || ''}</div></td>
-                <td class="p-3"><div class="font-bold text-gray-800">${o.name || ''}</div><div class="text-xs text-gray-500">${o.phone || ''}</div></td>
-                <td class="p-3 text-xs text-gray-600">${o.shippingName || ''}<br><span class="font-bold text-indigo-700">${o.storeInfo || ''}</span><br>LINE: ${lineStatus}</td>
-                <td class="p-3 text-xs text-gray-700">${itemsList}</td>
-                <td class="p-3 font-bold text-indigo-600">NT$ ${Number(o.total || 0).toLocaleString()}</td>
-                <td class="p-3">
-                    <select onchange="updateOrderStatusFromAdmin(${index}, this.value)" class="text-xs px-2 py-1 rounded-lg font-bold bg-amber-100 text-amber-800 border-0 cursor-pointer">
-                        <option value="待處理" ${o.status==='待處理'?'selected':''}>待處理</option>
-                        <option value="運送中" ${o.status==='運送中'?'selected':''}>運送中</option>
-                        <option value="已到貨" ${o.status==='已到貨'?'selected':''}>已到貨</option>
-                        <option value="已完成" ${o.status==='已完成'?'selected':''}>已完成</option>
-                    </select>
-                </td>
-                <td class="p-3 text-right"><button onclick="orders.splice(${index},1); localStorage.setItem('daigou_orders', JSON.stringify(orders)); renderAdminOrders();" class="text-rose-500 text-xs cursor-pointer"><i class="fa-solid fa-trash"></i></button></td>
-            </tr>
-        `;
-    });
-    tbody.innerHTML = html;
-}
 
         async function updateOrderStatusFromAdmin(index, newStatus) {
             orders[index].status = newStatus;
             localStorage.setItem('daigou_orders', JSON.stringify(orders));
-            let targetOrder = orders[index];
-
-            if (settings.sheetsUrl && (newStatus === '已到貨' || newStatus === '運送中')) {
+            if (settings.sheetsUrl) {
                 try {
                     await fetch(settings.sheetsUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action: 'updateOrderStatus', orderId: targetOrder.id, newStatus: newStatus })
+                        method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'updateOrderStatus', orderId: orders[index].id, newStatus: newStatus })
                     });
-                    alert(`狀態已更新為【${newStatus}】，並已觸發 LINE 到貨通知給買家！`);
-                } catch(e) { alert('狀態已更新，但 LINE 通知觸發失敗。'); }
+                    alert(`訂單狀態已更新為【${newStatus}】！`);
+                } catch(e) { alert('本機已更新，雲端同步失敗。'); }
             } else { alert('訂單狀態已更新！'); }
             renderAdminOrders();
         }
 
         function renderSettingsPanel() {
             document.getElementById('setting-brand').value = settings.brand;
-            document.getElementById('setting-login-secret').value = settings.loginChannelSecret || '';
+            document.getElementById('setting-line-basic-id').value = settings.lineBasicId || '';
             document.getElementById('setting-line-url').value = settings.lineUrl || '';
             document.getElementById('setting-sheets-url').value = settings.sheetsUrl || '';
             document.getElementById('setting-bank-info').value = settings.bankInfo || '';
@@ -1223,8 +973,8 @@ function renderAdminOrders() {
         }
 
         async function saveBasicSettings() {
-            settings.brand = document.getElementById('setting-brand').value.trim() || "海外代購選物所";
-            settings.loginChannelSecret = document.getElementById('setting-login-secret').value.trim();
+            settings.brand = document.getElementById('setting-brand').value.trim() || "參雪家嚼感飲品 武廟店";
+            settings.lineBasicId = document.getElementById('setting-line-basic-id').value.trim();
             settings.lineUrl = document.getElementById('setting-line-url').value.trim();
             settings.sheetsUrl = document.getElementById('setting-sheets-url').value.trim();
             settings.bankInfo = document.getElementById('setting-bank-info').value.trim();
@@ -1237,22 +987,13 @@ function renderAdminOrders() {
             if (settings.sheetsUrl) {
                 try {
                     await fetch(settings.sheetsUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'saveSettings',
-                            settingsJson: JSON.stringify(settings)
-                        })
+                        method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'saveSettings', settingsJson: JSON.stringify(settings) })
                     });
                     await syncProductsToCloud();
-                    alert('設定與商品資料已成功同步至雲端！');
-                } catch(e) {
-                    alert('已儲存至本機，但雲端同步失敗，請檢查 GAS 網址。');
-                }
-            } else {
-                alert('設定已儲存！');
-            }
+                    alert('設定已儲存並同步至雲端！');
+                } catch(e) { alert('已儲存至本機，雲端同步失敗。'); }
+            } else { alert('設定已儲存！'); }
         }
 
         function addCountry() {
@@ -1264,41 +1005,23 @@ function renderAdminOrders() {
             renderSettingsPanel(); renderCategoryFilters(); renderAdminProducts();
         }
 
-        function openBuyerOrdersModal() {
-            document.getElementById('buyer-orders-modal').classList.remove('hidden');
-            document.getElementById('query-phone-input').value = '';
-            document.getElementById('buyer-orders-result-container').innerHTML = `<div class="text-center py-8 text-gray-400 text-sm">請輸入手機號碼查詢您的歷史訂單紀錄</div>`;
-        }
-
+        function openBuyerOrdersModal() { document.getElementById('buyer-orders-modal').classList.remove('hidden'); document.getElementById('query-phone-input').value = ''; document.getElementById('buyer-orders-result-container').innerHTML = `<div class="text-center py-8 text-gray-400 text-sm">請輸入手機號碼查詢您的歷史訂單紀錄</div>`; }
         function closeBuyerOrdersModal() { document.getElementById('buyer-orders-modal').classList.add('hidden'); }
 
         function searchBuyerOrders() {
             let phone = document.getElementById('query-phone-input').value.trim();
             const container = document.getElementById('buyer-orders-result-container');
             if (!phone) { alert('請輸入手機號碼！'); return; }
-
             let matched = orders.filter(o => o.phone === phone);
-            if (matched.length === 0) {
-                container.innerHTML = `<div class="text-center py-8 text-rose-500 font-bold text-sm">找不到手機號碼為「${phone}」的訂單紀錄</div>`;
-                return;
-            }
-
-            let html = '';
-            matched.forEach((o) => {
-                let itemsList = o.rawItems ? o.rawItems.map(i => `${i.name} x${i.qty}`).join('<br>') : '';
-                html += `
-                    <div class="bg-gray-50 border rounded-2xl p-4 space-y-2 text-xs">
-                        <div class="flex justify-between font-bold border-b pb-2">
-                            <span class="text-indigo-600">${o.id}</span>
-                            <span class="px-2 py-0.5 rounded-full ${o.status === '待處理' ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800'}">${o.status}</span>
-                        </div>
-                        <p><strong>取貨門市：</strong>${o.storeInfo}</p>
-                        <p><strong>商品明細：</strong><br>${itemsList}</p>
-                        <p class="font-black text-sm text-right text-gray-900 pt-1">總金額：NT$ ${o.total.toLocaleString()}</p>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
+            if (matched.length === 0) { container.innerHTML = `<div class="text-center py-8 text-rose-500 font-bold text-sm">找不到手機號碼為「${phone}」的訂單紀錄</div>`; return; }
+            container.innerHTML = matched.map((o) => `
+                <div class="bg-gray-50 border rounded-2xl p-4 space-y-2 text-xs">
+                    <div class="flex justify-between font-bold border-b pb-2"><span class="text-indigo-600">${o.id}</span><span class="px-2 py-0.5 rounded-full ${o.status === '待處理' ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800'}">${o.status}</span></div>
+                    <p><strong>取貨門市：</strong>${o.storeInfo}</p>
+                    <p><strong>商品明細：</strong><br>${o.rawItems ? o.rawItems.map(i => `${i.name} x${i.qty}`).join('<br>') : ''}</p>
+                    <p class="font-black text-sm text-right text-gray-900 pt-1">總金額：NT$ ${o.total.toLocaleString()}</p>
+                </div>
+            `).join('');
         }
 
         function exportOrdersCSV() {
@@ -1312,18 +1035,10 @@ function renderAdminOrders() {
             let link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
             link.setAttribute("download", `代購訂單列表_${new Date().toISOString().split('T')[0]}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
         }
 
-        function clearOrders() {
-            if (confirm('確定要清空所有買家訂單紀錄嗎？此動作無法復原！')) {
-                orders = [];
-                localStorage.setItem('daigou_orders', JSON.stringify(orders));
-                renderAdminOrders();
-            }
-        }
+        function clearOrders() { if (confirm('確定要清空所有買家訂單紀錄嗎？')) { orders = []; localStorage.setItem('daigou_orders', JSON.stringify(orders)); renderAdminOrders(); } }
     </script>
 </body>
 </html>
