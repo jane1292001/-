@@ -870,7 +870,7 @@
             // 產生帶有訂單編號的 LINE 自動訊息連結 (oaMessage)
             document.getElementById('success-order-id').innerText = orderId;
             const officialLink = document.getElementById('success-line-link');
-            let prefillMsg = encodeURIComponent(`您好，我要回報訂單編號：${orderId}`);
+            let prefillMsg = encodeURIComponent(`Hello，我的訂單編號是：${orderId}，請幫我確認~`);
             
             if (settings.lineBasicId && settings.lineBasicId.trim() !== "") {
                 let cleanId = settings.lineBasicId.trim();
